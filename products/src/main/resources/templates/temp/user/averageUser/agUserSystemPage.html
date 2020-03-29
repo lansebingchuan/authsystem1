@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理已注册的系统</title>
+
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+       <div class="layui-row">
+           <div class="layui-btn-container" style="float: right;">
+               <button class="layui-btn layui-btn-sm" onclick="addNewSystem()">新建加入</button>
+           </div>
+       </div>
+        <table id="listAgUserSystem" lay-filter="test"></table>
+
+        <script type="text/html" id="indexTpl">
+            {{d.LAY_INDEX+1}}
+        </script>
+
+        <script type="text/html" id="editTpl">
+            {{# if(d.audit === 0 || d.audit === '0'){ }}
+              <a class="layui-btn layui-btn-danger layui-btn-xs">等待审核中</a>
+            {{# }else if(d.audit === 2 || d.audit === '2'){ }}
+            <a class="layui-btn layui-btn-warm layui-btn-xs">已被拒绝</a>
+            {{# }else{ }}
+              <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="del">解除关系</a>
+            {{# } }}
+        </script>
+
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+
+<script src="/js/common.js"></script>
+
+
+<script>
+    var sysRegUuid;
+
+    var sysRegNames;
+
+</script>
+
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+        //第一个实例//LAY_TABLE_INDEX
+        table.render({
+            elem: '#listAgUserSystem'
+            ,height: 312
+            ,url: '/averageUser/listAgUserSystem' //数据接口
+            ,page: true //开启分页
+            ,cols: [
+                [ //表头
+                {field: 'id', title: 'ID', width:80,fixed: 'left', type: 'numbers'}
+                ,{field: 'userName', title: '发布者', width:100}
+                ,{field: 'sysName', title: '系统名称', width:250}
+                ,{field: 'sysUrl', title: '系统地址'}
+                ,{field: 'sysUuid', title: '系统编号', width: 300}
+                ,{field: 'sysDescribed', title: '系统描述'}
+                ,{field: 'sysTypeName', title: '系统类型'}
+                ,{field: 'audit', title:'操作', templet: '#editTpl', width:150}
+            ]
+            ]
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function(obj){
+            debugger
+            var data = obj.data;
+            //console.log(obj)
+            if(obj.event === 'del'){
+                window.top.layer.confirm('真的解除这个系统的关系吗！', function(index){
+                    $.post("/averageUser/cancelUserSys", {userSystemId: data.userSystemId} , function (data) {
+                        if (data){
+                            obj.del();
+                            window.top.layer.msg("解除关系成功！", {icon: 6})
+                        }else {
+                            window.top.layer.msg("解除关系失败！", {icon: 6})
+                        }
+                    });
+                    window.top.layer.close(index);
+                });
+            } else if(obj.event === 'edit'){
+                window.top.layer.prompt({
+                    formType: 2
+                    ,value: data.email
+                }, function(value, index){
+                    obj.update({
+                        email: value
+                    });
+                    window.top.layer.close(index);
+                });
+            }
+        });
+
+    });
+
+</script>
+
+<script>
+    
+    function addNewSystem() {
+        openCenterWin("选择加入", "确认", '/averageUser/regSysSelect' , function (index, data) {
+            var sysRegs = data;
+            var sysRegNames = '';
+            $.each(sysRegs, function (index, sysReg) {
+                if (index === 0){
+                    sysRegUuid = sysReg.sysUuid;
+                    sysRegNames = sysReg.sysRegName;
+                }else {
+                    sysRegNames = sysRegNames + '、' +sysReg.sysRegName;
+                    sysRegUuid = sysRegUuid + '&' + sysReg.sysUuid;
+                }
+                console.log(sysRegNames);
+            })
+            $('#sysRegName').val(sysRegNames);
+            $.post("/averageUser/addNewSystem", {sysRegUuid: sysRegUuid} , function (data) {
+               if (data){
+                   window.top.layer.msg("加入系统成功！等待审核!", {icon: 6})
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+               }else {
+                   window.top.layer.msg("加入系统失败，请联系管理员!", {icon: 6})
+               }
+            });
+        })
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>人员管理</title>
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+    <link href="/js/jquery/pagination/pagination.css" rel="stylesheet">
+</head>
+<style>
+    html,
+    body {
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body onload="showDate()">
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+<div class="container-fluid" id="tree">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 65px;">
+            <div class="tree">
+                <ul id="menu_tree">
+                    <!--左侧权限控制导航栏-->
+                </ul>
+                <ul style="padding-left:0px;display: none" class="list-group" id="noSys">
+                    <li class="list-group-item tree-closed">
+                        <a href="/main.htm"><i class="glyphicon glyphicon-dashboard"></i> 控制面板</a>
+                    </li>
+                    <li class="list-group-item">
+                        <span><i class="glyphicon glyphicon-ok"></i> 录入系统信息 <span class="badge"
+                                                                                  style="float:right">3</span></span>
+                        <ul style="margin-top:10px;display:none;">
+                            <li style="height:30px; width: 130px;" onclick="addRole()">
+                                <a href="#"><i class="glyphicon glyphicon-check"></i> 添加角色信息</a>
+                            </li>
+                            <li style="height:30px;" onclick="addSysPermission()">
+                                <a href="#"><i class="glyphicon glyphicon-check"></i> 增加授权路径信息</a>
+                            </li>
+                            <li style="height:30px;" onclick="addRole_Permission()">
+                                <a href="auth_project.htm"><i class="glyphicon glyphicon-check"></i> 分配角色权限</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-10" style="margin-top: 55px;">
+            <!--margin-top: 25px;-->
+            <div class="row">
+                <div class="col-md-12" style="margin-top: 5px">
+                    <h1>数据列表</h1>
+                    <hr>
+                </div>
+                <div class="col-md-12" style="">
+                    <div class="panel-body">
+                        <form class="form-inline" role="form" style="float:left;width: 1000px;">
+                            <div class=" row">
+                                <div class="col-md-10">
+                                    <div class="row">
+                                        <div class="col-md-2"> <button type="button" disabled
+                                                                       class="btn btn-primary"> 条件查询：</button></div>
+                                        <div class="col-md-4">姓名：<input id="userName"
+                                                                        class="form-control has-success" type="text" placeholder="请输入姓名">
+                                        </div>
+                                        <div class="col-md-5">角色：
+                                            <!-- Single button -->
+                                            <div class="btn-group">
+                                                <button id="role" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    人员类型<span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a href="#" onclick="selectRole('admin')">管理员</a></li>
+                                                    <li><a href="#" onclick="selectRole('averageUser')">普通用户</a></li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li><a href="#" onclick="selectRole('')">取消</a></li>
+                                                </ul>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="margin-left: -260px;">
+                                    <button type="button" id="queryButton" class="btn btn-warning"><i
+                                            class="glyphicon glyphicon-search"></i> 查询</button>
+                                </div>
+                            </div>
+                        </form>
+                        <button id="deleteAll" type="button" class="btn btn-danger"
+                                style="float:right;margin-left:10px;"><i class=" glyphicon glyphicon-remove"></i>
+                            删除</button>
+                        <button id="newadd" type="button" class="btn btn-primary" style="float:right;"
+                                onClick="addUser()"><i class="glyphicon glyphicon-plus"></i> 新增</button>
+                        <button id="fanxuan" type="button" class="btn btn-primary"
+                                style="float:right;margin-right:10px;"><i class="glyphicon glyphicon-refresh"></i>
+                            反选</button>
+                        <br>
+                        <hr style="clear:both;">
+                        <div class="table-responsive">
+                            <table class="table  table-bordered">
+                                <thead>
+                                <tr>
+                                    <th width="50">序号</th>
+                                    <th width="30"><input id="selectAll" type="checkbox"></th>
+                                    <th>系统编号</th>
+                                    <th>登录名</th>
+                                    <th>姓名</th>
+                                    <th>职务</th>
+                                    <th>权限</th>
+                                    <th width="100">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="pageUser">
+
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="8" align="center">
+                                        <ul class="pagination" id="parentPotion">
+                                            <div id="Pagination" class="pagination">
+                                                <!-- 这里显示分页 -->
+                                            </div>
+                                        </ul>
+                                    </td>
+                                </tr>
+
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/leftMenu.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script>
+    //控制点击的什么栏显示
+    var pathname = window.location.pathname;
+    $(menuTree).find("dl a[href=\'" + pathname + "\']").parent().attr("class", "layui-nav-item layui-this");
+</script>
+<script>
+
+
+    var totalPage = 0;//总页数
+    var pageLength;//每页的数量
+    var data = { "pagePoint": 1, "pageSize": 1 };
+    var deleteid = false; //是否删除
+    var query = false;//表示是否查询
+    var numPage = 0 ;//当前页面
+    var checks;  //所有的复选框
+    $(initSysManageData());
+
+    function initSysManageData(index) {
+        if (!index) {//不存在默认查询第一页
+            index=1;
+        }else {
+            if (deleteid) {//表示删除了，还是查询当前页
+
+            }else {
+                index = index + 1;
+            }
+        }
+        if (numPage == index && $.trim(data.userName) == "" && $.trim(data.role) == "") {//如果在当前页,如果查询的为空
+            if (!deleteid) {//并且没有删除，那么返回
+                return;
+            }
+        }
+
+        numPage = index;//当前页
+        data.pagePoint = numPage;//传到后台的当前页
+        $.ajax({
+            type: "get",
+            url: "/listUserSysManager",
+            data: data,
+            success: function (result) {
+                if (result.flage) {//查询成功
+                    removes();//移除之前的元素
+                    if (!deleteid && !query) {//没有进行其他的操作，表示查询成功
+                        layer.msg("信息查询成功！", { time: 1000, icon: 6, shift: 6 });
+                    }
+                    deleteid = false;//恢复
+                    var page = result.page;
+                    totalPage = page.totalPage;//总共的页数
+                    var lists = page.lists;
+                    pageLength = lists.length;//每页数量，判断是否删除完了
+                    if (lists.length > 0) {
+                        lists.forEach(tbodyPage);/* 添加role数据 */
+                        checks = $("tbody tr td input[type=checkbox]");//得到所有的复选框
+                        if (query) {
+                            layer.msg("检索成功！", { time: 1000, icon: 6, shift: 6 });
+                            query = false;//恢复
+                        }
+                    } else {//当前的页数量没有
+                        numPage = numPage - 1;//数量页号减
+                    }
+                    //TotalPage();//添加页的位置数
+                    // 创建分页
+                    $("#Pagination").pagination(totalPage, {
+                        num_edge_entries: 2, //边缘页数
+                        num_display_entries: 4, //主体页数
+                        callback: initSysManageData,
+                        current_page: numPage - 1,
+                        items_per_page: 1,//每页显示1项
+                        prev_text: "前一页",
+                        next_text: "后一页"
+                    });
+                } else {//查询失败
+                    layer.msg("查询失败！", { time: 1000, icon: 5, shift: 6 });
+                }
+            },
+            error: function () {
+                layer.msg("查询失败！", { time: 1000, icon: 5, shift: 6 });
+            }
+        });
+    }
+    function removes() {//移除之前的list集合
+        var tbodys = $("tbody");
+        tbodys.empty();//删除所有的管理员
+    }
+    function tbodyPage(value, n) {//渲染页面数据
+        var tbodys = $("tbody");
+        var href = "window.location.href='/editUserPage?userId=" + value.id + "'";
+        var hrefUserRole = "window.location.href='/editUserRolePage?userId=" + value.id + "'";
+        var roleName = '';
+        if (value.role === 'admin'){
+            roleName = '管理员'
+        }else {
+            roleName = '普通会员'
+        }
+        var tr = '<tr>' +
+            '<td>' + (n + 1) + '</td>' +
+            ' <td width="50"><input type="checkbox" onclick="checkbox()" id="' + value.id + '"></td>' +
+            '<td>' + value.sysUuid + '</td>' +
+            '<td>' + value.loginName + '</td>' +
+            '<td>' + value.userName + '</td>' +
+            '<td>' + roleName + '</td>' +
+            '<td>' + value.roleNames + '</td>' +
+            '<td style="width: 150px">' +
+            '<button style="margin-left: 12px" type="button" onclick="' + href + '"  class="btn btn-primary btn-xs"><i class=" glyphicon glyphicon-edit"></i></button>' +
+            '<button style="margin-left: 20px"  type="button" onclick="' + hrefUserRole + '"  class="btn btn-success btn-xs"><i class=" glyphicon glyphicon-list-alt"></i></button>' +
+            '<button style="margin-left: 20px"  type="button" style="margin-left: 20px;" onclick=' + '"deleteUserById(' + value.id + ',\'' + value.userName + '\')"' + ' class="btn btn-danger btn-xs"><i class=" glyphicon glyphicon-remove"></i></button>' +
+            '</td>' +
+            '</tr>';
+        tbodys.append(tr);
+    }
+    function addUser() {//取增加元素页面
+        window.location.href = "/addUserPage";
+    }
+
+    $(function () {//获取当前的URL，并设置点击的样式
+        var href = window.location.href;
+        var host = window.location.host;
+        var hostindex = href.indexOf(host);
+        var hostLength = host.length;
+        var url = href.substr(hostindex + hostLength);//获取当前的URL，
+        var as = $("#tree ul li ul li a");
+        var acss = $('#tree ul li ul li a[href="' + url + '"]')
+        acss.css("color", "red");
+
+    });
+
+    function checkbox() {//解决方法，在每个复选框上固定一个点击事件
+        var boo = true;
+        //为每一个复选框注册点击事件
+        checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+            if (!value.checked) {//只要有一个为false，那么取消全选的 选择
+                boo = false;
+                return false;
+            }
+        });
+        $("#selectAll").prop("checked", boo);
+    }
+
+    $("#selectAll").click(function () {//选择所有用户，或者取消
+        var flage = this.checked
+        checks.each(function () {
+            this.checked = flage;
+        });
+    });
+    $("#fanxuan").click(function () {     //复选框反选
+        var iffan = false; var bexuan = true;
+        checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+            if (value.checked) {
+                iffan = true;
+            }
+        });
+        checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+            if (!value.checked) {
+                bexuan = false;
+                return false;
+            }
+        });
+        if (iffan) {//为真表示有被选
+            if (bexuan) {
+                checks.each(function () {//checks：所有的复选框，在完成加载的时候得到
+                    this.checked = false;
+                });
+                $("#selectAll").removeAttr("checked", false);
+            } else {
+                checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+                    if (value.checked) {
+                        value.checked = false;
+                    } else {
+                        value.checked = true;
+                    }
+                });
+            }
+        } else {//没有一个被选
+            checks.each(function () {
+                this.checked = true;
+            });
+            $("#selectAll").prop("checked", true);
+        }
+    });
+
+    function deleteUserById(userId, userName) {//删除 USerById
+        layer.confirm("是否删除_" + userName + "_用户", { icon: 3, title: '提示' }, function (cindex) {
+            layer.close(cindex);//确认区域
+            $.post("/deleteUserListByIds", { ids: userId },
+                function (result) {
+                    if (result) {
+                        deleteid = true;
+                        layer.msg("成功删除！", { time: 1000, icon: 6, shift: 6 });
+                        initSysManageData(numPage);//成功删除之后加载当前页的数据
+                    } else {
+                        layer.msg("删除失败！", { time: 1000, icon: 5, shift: 6 });
+                    }
+                }
+            );
+        }, function (cindex) {//否定区域
+            layer.close(cindex);
+            //取消就返回
+        });
+    }
+
+    $("#deleteAll").click(function () {//点击批量选择删除
+        var ids = "";
+        //方法一
+        var count = 0;
+        checks.each(function (n, value) {//方法一，得到数据，是以字符串对象得到
+            if (value.checked) {
+                if (count != 0) {//是否被选中
+                    ids += "_";
+                }
+                ids += value.id;
+                count++;
+            }
+        });
+        if (ids == "") {
+            layer.msg("请选择需要删除的用户！", { time: 1000, icon: 5, shift: 6 });
+            return;
+        }
+        //方法二
+        // var userIdList = {};//空的JSON对象,里面封装data数组，进行多条数据传输，每条数据是一个实体对象
+        // checks.each(function (n, value) {//方法一，得到数据，是以JSON对象
+        //     if (value.checked) {
+        //         /* userlist["userlist[0].id"] = value.id; */
+        //         userIdList["userlist[" + n + "]"] = value.id;
+        //     }
+        // });
+        // console.log(userIdList);
+        // //发送请求
+        // if (JSON.stringify(userIdList) == "{}") {
+        //     layer.msg("请选择需要删除的用户！", { time: 1000, icon: 5, shift: 6 });
+        //     return;
+        // }
+        layer.confirm("确认删除？", { icon: 2, title: '警告' }, function (cindex) {//询问是否删除
+            layer.close(cindex);
+            /* $.post("/user/deleteUsers.do" , ids , function(result) { *///以字符串的形式封装传输
+            $.post("/deleteUserListByIds", { ids: ids }, function (result) { //以JSON对象数组方式封装传输
+                if (result.flage) {
+                    layer.msg("成功 删除！", { time: 1000, icon: 6, shift: 6 });
+                    deleteid = true;//用于表示是否显示查询成功
+                    if (numPage == 2) {//如果剩余两页，那么跳转到第一页
+                        initSysManageData(1);
+                    } else {//否则调转到相关页面
+                        initSysManageData(numPage);
+                    }
+                } else {
+                    layer.msg("删除失败！", { time: 1000, icon: 5, shift: 6 });
+                }
+            });
+        }, function (cindex) {//取消
+            layer.close(cindex);
+            return;
+        });
+    });
+
+    $("#queryButton").click(function () {
+        var userName = $("#userName");
+        //定位第0页
+        numPage = 0;
+        data.userName = userName.val();
+        initSysManageData();
+    })
+    
+    function selectRole(role) {
+        data.role = role;
+        if (role == 'averageUser'){
+            $("#role").text('普通用户');
+        }
+        if (role == 'admin'){
+            $("#role").text('管理员');
+        }
+        if (role == ''){
+            data.role = null;
+            $("#role").text('人员类型');
+        }
+    }
+
+    function exit() {
+        window.location.href = "/";
+    }
+</script>
+</body>
+
+</html>

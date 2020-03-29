@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keys" content="">
+    <meta name="author" content="">
+	<link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/oneself/login.css">
+      <script src="../static/js/jquery/jquery-2.1.1.min.js"></script>
+      <script src="../static/js/jquery/jquery-form.min.js"></script>
+      <script src="../static/js/layer/layer.js"></script><!--弹层组件-->
+
+      <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+      <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+	</style>
+  </head>
+  <body onload="createCode()">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <div><a class="navbar-brand" href="/" style="font-size:32px;">统一管理登录平台</a></div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" style="width: 400px;margin-top: 70px;">
+      <form id="loginForm"  class="form-signin" role="form">
+        <h2 class="form-signin-heading"><i class="glyphicon glyphicon-log-in"></i> 用户登录</h2>
+		  <div class="form-group has-primary has-feedback">
+			<input name="loginacct" type="text" class="form-control" id="loginName" value="zht" placeholder="请输入登录账号" autofocus>
+			<span class="glyphicon glyphicon-user form-control-feedback"></span>
+		  </div>
+		  <div class="form-group has-primary has-feedback">
+			<input name="userpswd" type="password" class="form-control" id="userpswd" value="1" placeholder="请输入登录密码" style="margin-top:10px;">
+			<span class="glyphicon glyphicon-lock form-control-feedback"></span>
+		  </div>
+		  <div class="form-group has-primary has-feedback">
+              <select class="form-control" name="role" id="role">
+                <option value="averageUser" selected>普通</option>
+                <option value="admin">管理</option>
+             </select>
+		  </div>
+		  <div class="form-group has-primary has-feedback">
+				<div class="form-group has-primary has-feedback" style="width: 170px; height: 30px;">
+						<input id="yzm" type="text" style="width: 160px;"  class="has-primary" placeholder="验证码"/>
+						<span style="margin-left: -30px;" class="glyphicon glyphicon-exclamation-sign"></span>
+		         </div>
+				<div class="yanma" style="line-height: 25px; height: 25px;border: 1px solid;text-align: center; margin-left: 190px; margin-top: -45px;letter-spacing: 7px; font-weight: 700;color: #337ab7;">
+					&nbsp;<span id="discode" onclick="createCode()"></span><!--这里显示验证码-->
+				</div>
+          </div>
+          <div class="form-group has-primary has-feedback">
+              <a class="btn btn-lg btn-primary btn-block" onclick="dologin()" style="margin-top: 15px;"> 登录</a>
+              <a class="btn btn-lg btn-success btn-block" style="margin-top: 10px;clear: both" href="/reg">我要注册</a>
+          </div>
+        <!--<div class="checkbox">
+          <label>
+            <input type="checkbox" value="1" name="rememberme"> 记住我
+          </label>
+          <br>
+          <label>
+                                                  忘记密码
+          </label>
+          <label style="float:right">
+            <a href="/reg.htm">我要注册</a>
+          </label>
+        </div>-->
+
+      </form>
+    </div>
+
+    <script src="/js/jquery/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery/jquery-form.min.js"></script>
+    <script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+
+    <script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+    <script>
+			var yzm = $("#yzm");//
+			var discode;
+		    function createCode() {//请求验证码
+                $.get("/getRandomNumber", function(data){
+					   $("#discode").text(data);
+					   discode = data;
+		    	 })
+            }
+		    function dologin() {
+		   /*  使用 ajax 请求发送表单数据 */
+		    var loginName = $("#loginName");
+		    var userpswd = $("#userpswd");
+		    var role = $("#role");
+		    if ($.trim(loginName.val()) == "") {
+		    	  /* alert("请输入登录名"); */
+		    	  layer.msg("请输入登录名", {time:1000, icon:5, shift:6}, function(){
+                      loginName.focus();
+                      loginName.val("");
+		    	  });
+		    	  return;
+		    }
+                if ($.trim(userpswd.val()) == "") {
+                    layer.msg("请输入登录密码", {time:1000, icon:5, shift:6}, function(){
+                        userpswd.focus();
+                        userpswd.val("");
+                      });
+                    return;
+                }
+                /*if ($.trim(yzm.val()) == "") {
+                    layer.msg("请输入验证码", {time:1000, icon:5, shift:6}, function(){
+                        yzm.focus();
+                        yzm.val("");
+                      });
+                    return;
+                };
+                if($.trim(yzm.val()) != discode){//前台验证输入是否正确
+                    layer.msg("验证码输入错误！", {time:1000, icon:5, shift:6}, function(){
+                        t1.focus();
+                        t1.val("");
+                      });
+                    return;
+                }*/
+			$.post("/testRandomNumber", {discode : yzm.val()} ,function(data){//后台验证是否输入正确
+		    	//data.flage != true
+			    if (false == true) {//验证失败
+                    layer.msg(data.message, {time:1000, icon:5, shift:6}, function(){
+                        yzm.focus();
+                        yzm.val("");
+                    });
+			    }else{
+                    $.post("/dologin", {loginName: loginName.val() , password:userpswd.val(), role:role.val() },function(data){                             //登录
+                        if (data.flage == true) {//登录成功
+                            if (data.role == 'admin') {
+                                window.location.href="/main";
+                            }else if(data.role == 'averageUser'){
+                                window.location.href="/averageUser/main";
+                            }else {
+                                window.location.href="/index";
+                            }
+                        }else {
+                            layer.msg("登录错误，用户名或者密码错误", {time:1000, icon:5, shift:6});
+                        }
+                    }).error(function() {
+                        layer.msg("连接错误，请稍后重试！", {time:1000, icon:5, shift:6});
+                    });
+                }
+			})
+
+		      /*   var type = $(":selected").val();
+		        if ( type == "user" ) {
+		            window.location.href = "main.html";
+		        } else {
+		            window.location.href = "index.html";
+		        } */
+		    }
+		/*     $(document).ajaxError(function(event,xhr,options,exc){
+		    	console.log(event);console.log(xhr);console.log(options);console.log(exc);
+		    	console.log(xhr.status);
+		    });  */
+    </script>
+  </body>
+</html>

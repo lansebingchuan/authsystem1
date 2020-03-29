@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>需要处理的人员审核</title>
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+</head>
+<body  onload="showDate()">
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+<div class="container-fluid" id="tree">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 65px;">
+            <div class="tree">
+                <ul id="menu_tree">
+                    <!--左侧权限控制导航栏-->
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-10" style="margin-top: 55px;">
+            <!--margin-top: 25px;-->
+            <div class="row">
+                <div class="col-md-12" style="margin-top: 5px">
+                    <h1>数据列表</h1>
+                    <hr>
+                </div>
+                <div class="col-md-12" style="">
+                    <div class="panel-body">
+                        <table id="listAuditUserSystem" lay-filter="test"></table>
+
+                        <script type="text/html" id="indexTpl">
+                            {{d.LAY_INDEX+1}}
+                        </script>
+
+                        <script type="text/html" id="editTpl"><!--through\refused-->
+                            {{# if(d.audit === 0 || d.audit === '0'){ }}
+                                <a class="layui-btn layui-btn-xs" lay-event="through">认证通过</a>
+                                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="refused">拒绝通过</a>
+                            {{# }else if(d.audit === 2 || d.audit === '2'){ }}
+                                <a class="layui-btn layui-btn-warm layui-btn-xs">已经拒绝</a>
+                                <a class="layui-btn layui-btn-xs" lay-event="through">认证通过</a>
+                            {{# } else{ }}
+                                <a class="layui-btn layui-btn-xs">无须处理</a>
+                            {{# }  }}
+                        </script>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="/js/mian.js"></script>
+<script src="/js/leftMenu.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script>
+    //控制点击的什么栏显示
+    var pathname = window.location.pathname;
+    $(menuTree).find("dl a[href=\'" + pathname + "\']").parent().attr("class", "layui-nav-item layui-this");
+</script>
+
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+        //第一个实例//LAY_TABLE_INDEX
+        table.render({
+            elem: '#listAuditUserSystem'
+            ,height: 312
+            ,url: '/listUserSystemAudit' //数据接口
+            ,page: true //开启分页
+            ,cols: [
+                [ //表头
+                    {field: 'id', title: 'ID', width:80 ,fixed: 'left', type: 'numbers'}
+                    ,{field: 'userName', title: '请求者', width:100}
+                    ,{field: 'sysName', title: '系统名称', width:180}
+                    ,{field: 'sysUrl', title: '系统地址'}
+                    ,{field: 'sysUuid', title: '系统编号', width: 300}
+                    ,{field: 'sysDescribed', title: '系统描述'}
+                    ,{field: 'sysTypeName', title: '系统类型'}
+                    ,{field: 'audit', title:'操作', templet: '#editTpl', width:160}
+                ]
+            ]
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function(obj){
+            debugger
+            var data = obj.data;
+            var audit;
+            var msg;
+            //console.log(obj)through\refused
+            if(obj.event === 'through'){
+                audit = 1;//通过
+                msg = '确定通过吗！';
+            } else if(obj.event === 'refused'){
+                audit = 2;//拒绝
+                msg = '确定拒绝吗！';
+            }
+            window.top.layer.confirm(msg, function(index){
+                $.post("/updateAuditToThrough", {audit: audit, id: data.userSystemId} , function (data) {
+                    if (data){
+                        if (audit === 1){
+                            window.top.layer.msg("已成功同意使用系统！", {icon: 6})
+                        }else {
+                            window.top.layer.msg("已拒绝该用户使用系统！", {icon: 6})
+                        }
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    }else {
+                        window.top.layer.msg("调解失败！", {icon: 5})
+                    }
+                });
+                window.top.layer.close(index);
+            });
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

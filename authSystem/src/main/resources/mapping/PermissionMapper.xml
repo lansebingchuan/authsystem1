@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zht.dao.PermissionMapper" >
+  <resultMap id="BaseResultMap" type="com.zht.bean.Permission" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <id column="sysUuid" property="sysUuid" jdbcType="VARCHAR" />
+    <result column="pId" property="pId" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sysUuid, pId, name, icon, url
+  </sql>
+  <insert id="insert" parameterType="com.zht.bean.Permission" >
+    insert into permission (id, sysUuid, pId,
+      name, icon, url)
+    values (#{id,jdbcType=INTEGER}, #{sysUuid,jdbcType=VARCHAR}, #{pId,jdbcType=INTEGER},
+      #{name,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zht.bean.Permission" >
+    insert into permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sysUuid != null" >
+        sysUuid,
+      </if>
+      <if test="pId != null" >
+        pId,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="icon != null" >
+        icon,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="sysUuid != null" >
+        #{sysUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="pId != null" >
+        #{pId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zht.bean.Permission" >
+    update permission
+    <set >
+      <if test="pId != null" >
+        pId = #{pId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+      and sysUuid = #{sysUuid,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zht.bean.Permission" >
+    update permission
+    set pId = #{pId,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR},
+      icon = #{icon,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+      and sysUuid = #{sysUuid,jdbcType=VARCHAR}
+  </update>
+  <select id="listAllPermissionBySys" resultType="Permission" parameterType="java.lang.String">
+    SELECT * FROM permission WHERE permission.sysUuid = #{sysUuid} ORDER BY id
+  </select>
+  <select id="selectPermissionSingleById" resultType="Permission" parameterType="java.lang.Integer">
+    SELECT * FROM permission WHERE permission.id = #{permissionId}
+  </select>
+  <delete id="removeSingleSysPermission" parameterType="java.lang.Integer">
+    delete from permission
+    where id = #{permissionId}
+  </delete>
+</mapper>

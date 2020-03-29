@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>排班管理</title>
+    <link rel="stylesheet" href="../../static/css/bootstrap/css/bootstrap.min.css">
+    <script src="../../static/js/jquery/jquery-2.1.1.min.js"></script>
+
+    <link rel="stylesheet" href="/css/bootstrap/css/bootstrap.min.css">
+</head>
+<style>
+    html,
+    body {
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body onload="showDate()">
+    <nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid" id="top">
+            <div class="navbar-header">
+                <div><a class="navbar-brand" style="font-size:32px;" href="#">智能排班系统</a></div>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse"
+                style="color: cornsilk; float: right; width: 500px;margin-top: 25px;">
+                <div style="float: left;">欢迎您：<span>{{userName}}</span></div>
+                <div style="float: left;margin-left: 30px; width: 350px;">当前时间：<span id="yearText">2019-10-15</span>
+                    <div style="margin-top: -30px;">
+                        <button id="newadd" type="button" class="btn btn-primary" style="float:right;"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" id="tree">
+        <div class="row">
+            <div class="col-md-2" style="margin-top: 65px;">
+                <div class="tree">
+                    <ul style="padding-left:0px;" class="list-group">
+                        <li class="list-group-item">
+                            <span><i class="glyphicon glyphicon glyphicon-tasks"></i> 排班管理 <span class="badge"
+                                    style="float:right">{{count}}</span>
+                            </span>
+                            <ul style="margin-top:10px;" v-if="flage" id="changColor">
+                                <li style="height:30px;">
+                                    <!-- <a id="weihu" href="/user/user.htm"><i class="glyphicon glyphicon-user"></i>排班管理</a> -->
+                                    <a href="/main/rygl"><i class="glyphicon glyphicon-user"></i><span>人员管理</span></a>
+                                    <!-- 设置需要挂载的连接 -->
+                                </li>
+                                <li style="height:30px; margin-top: 30px;">
+                                    <!-- <a href="/user/role.htm"><i class="glyphicon glyphicon-king"></i> 排班查询</a> -->
+                                    <a href="/main/pbgl"><i class="glyphicon glyphicon-king"></i><span>排班管理</span></a>
+                                </li>
+                                <li style="height:30px;margin-top: 30px;">
+                                    <!-- <a href="/user/role.htm"><i class="glyphicon glyphicon-king"></i> 排班查询</a> -->
+                                    <a href="/main/pbcx"><i class="glyphicon glyphicon-king"></i><span>排班查询</span></a>
+                                </li>
+                                <li style="height:30px;margin-top: 100%; list-style:none">
+
+                                </li>
+                            </ul>
+                            <ul style="margin-top:10px;" v-else>
+                                <li style="height:30px; margin-top: 30px;">
+                                    <!-- <a href="/user/role.htm"><i class="glyphicon glyphicon-king"></i> 排班查询</a> -->
+                                    <a to="/main/pbcx"><i class="glyphicon glyphicon-king"></i><span num="3"
+                                            v-on:click="changColor(3)">排班查询</span></a>
+                                </li>
+                        </li>
+                    </ul>
+                    </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-10" style="margin-top: 45px;">
+                <!--margin-top: 25px;-->
+                <div class="row">
+                    <div class="col-md-12" style="">
+                        <h1>数据列表</h1>
+                        <hr>
+                    </div>
+                    <div class="col-md-12" style="">
+                        <div class="panel-body">
+                            <form class="form-inline" role="form" style="float:left;width: 1000px;">
+                                <div class=" row">
+                                    <div class="col-md-10">
+                                        <div class="row">
+                                            <div class="col-md-2"> <button type="button" disabled
+                                                    class="btn btn-primary"> 条件查询：</button></div>
+                                            <div class="col-md-4">姓名：<input id="userName"
+                                                    class="form-control has-success" type="text" placeholder="请输入姓名">
+                                            </div>
+                                            <div class="col-md-5">手机号码：<input id="tel" class="form-control has-success"
+                                                    type="text" placeholder="请输入手机号码"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" style="margin-left: -150px;">
+                                        <button type="button" id="queryButton" class="btn btn-warning"><i
+                                                class="glyphicon glyphicon-search"></i> 查询</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <button id="deleteAll" type="button" class="btn btn-danger"
+                                style="float:right;margin-left:10px;"><i class=" glyphicon glyphicon-remove"></i>
+                                删除</button>
+                            <button id="newadd" type="button" class="btn btn-primary" style="float:right;"
+                                onClick="addUser()"><i class="glyphicon glyphicon-plus"></i> 新增</button>
+                            <button id="fanxuan" type="button" class="btn btn-primary"
+                                style="float:right;margin-right:10px;"><i class="glyphicon glyphicon-refresh"></i>
+                                反选</button>
+                            <br>
+                            <hr style="clear:both;">
+                            <div class="table-responsive">
+                                <table class="table  table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th width="50">序号</th>
+                                            <th width="30"><input id="selectAll" type="checkbox"></th>
+                                            <th>用户名</th>
+                                            <th>姓名</th>
+                                            <th>手机号码</th>
+                                            <th>职务</th>
+                                            <th width="100">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pageUser">
+
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="7" align="center">
+                                                <ul class="pagination" id="parentPotion">
+                                                    <div id="Pagination" class="pagination">
+                                                        <!-- 这里显示分页 -->
+                                                    </div>
+                                                </ul>
+                                            </td>
+                                        </tr>
+
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/jquery/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery/jquery-form.min.js"></script>
+    <script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+    <script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页插件-->
+
+    <script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+
+    <!--控制管理js-->
+
+    <script src="/css/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/js/main/mian.js"></script>
+    <script>
+
+
+        var totalPage = 0;//总页数
+        var pageLength;//每页的数量
+        var data = { "pagePoint": 1, "pageSize": 8 };
+        var deleteid = false; //是否删除
+        var query = false;//表示是否查询
+        var pagePoint = 1;
+        var checks;  //所有的复选框
+        $(initSysManageData(1));
+
+        function initSysManageData(pagePoint) {
+            data.pagePoint = pagePoint;//传到后台的当前页
+            $.ajax({
+                type: "post",
+                url: "/main/initUserData",
+                data: data,
+                success: function (result) {
+                    if (result.flage) {//查询成功
+                        removes();//移除之前的元素
+                        if (!deleteid && !query) {//没有进行其他的操作，表示查询成功
+                            layer.msg("信息查询成功！", { time: 1000, icon: 6, shift: 6 });
+                        }
+                        deleteid = false;//恢复
+                        var page = result.page;
+                        totalPage = page.totalPage;//总共的页数
+                        var lists = page.lists;
+                        pageLength = lists.length;//每页数量，判断是否删除完了
+                        if (lists.length > 0) {
+                            lists.forEach(tbodyPage);/* 添加role数据 */
+                            checks = $("tbody tr td input[type=checkbox]");//得到所有的复选框
+                            if (query) {
+                                layer.msg("检索成功！", { time: 1000, icon: 6, shift: 6 });
+                                query = false;//恢复
+                            }
+                        } else {//当前的页数量没有
+                            numPage = numPage - 2;//数量页号减
+                        }
+                        //TotalPage();//添加页的位置数
+                        // 创建分页
+                        $("#Pagination").pagination(totalPage, {
+                            num_edge_entries: 2, //边缘页数
+                            num_display_entries: 4, //主体页数
+                            callback: initSysManageData,
+                            current_page: numPage,
+                            items_per_page: 1,//每页显示1项
+                            prev_text: "前一页",
+                            next_text: "后一页"
+                        });
+                    } else {//查询失败
+                        layer.msg("查询失败！", { time: 1000, icon: 5, shift: 6 });
+                    }
+                },
+                error: function () {
+                    layer.msg("查询失败！", { time: 1000, icon: 5, shift: 6 });
+                }
+            });
+        }
+        function removes() {//移除之前的list集合
+            var tbodys = $("tbody");
+            tbodys.empty();//删除所有的管理员
+        }
+        function tbodyPage(value, n) {//渲染页面数据
+            var tbodys = $("tbody");
+            var href = "window.location.href='/main/toModifyUser?userId=" + value.id + "'";
+            var tr = '<tr>' +
+                '<td>' + (n + 1) + '</td>' +
+                ' <td width="50"><input type="checkbox" onclick="checkbox()" id="' + value.id + '"></td>' +
+                '<td>' + value.loginName + '</td>' +
+                '<td>' + value.username + '</td>' +
+                '<td>' + value.tel + '</td>' +
+                '<td>' + value.job + '</td>' +
+                '<td>' +
+                '<button type="button" onclick="' + href + '"  class="btn btn-success btn-xs"><i class=" glyphicon glyphicon-eye-open"></i></button>' +
+                '<button type="button" style="margin-left: 20px;" onclick=' + '"deleteUserById(' + value.id + ',\'' + value.userName + '\')"' + ' class="btn btn-danger btn-xs"><i class=" glyphicon glyphicon-remove"></i></button>' +
+                '</td>' +
+                '</tr>';
+            tbodys.append(tr);
+        }
+        function addUser() {//取增加元素页面
+            window.location.href = "/main/addUser";
+        }
+
+        $(function () {//获取当前的URL，并设置点击的样式
+            var href = window.location.href;
+            var host = window.location.host;
+            var hostindex = href.indexOf(host);
+            var hostLength = host.length;
+            var url = href.substr(hostindex + hostLength);//获取当前的URL，
+            var as = $("#tree ul li ul li a");
+            var acss = $('#tree ul li ul li a[href="' + url + '"]')
+            acss.css("color", "red");
+
+        });
+
+        function checkbox() {//解决方法，在每个复选框上固定一个点击事件
+            var boo = true;
+            //为每一个复选框注册点击事件
+            checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+                if (!value.checked) {//只要有一个为false，那么取消全选的 选择
+                    boo = false;
+                    return false;
+                }
+            });
+            $("#selectAll").prop("checked", boo);
+        }
+
+        $("#selectAll").click(function () {//选择所有用户，或者取消
+            var flage = this.checked
+            checks.each(function () {
+                this.checked = flage;
+            });
+        });
+        $("#fanxuan").click(function () {     //复选框反选
+            var iffan = false; var bexuan = true;
+            checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+                if (value.checked) {
+                    iffan = true;
+                }
+            });
+            checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+                if (!value.checked) {
+                    bexuan = false;
+                    return false;
+                }
+            });
+            if (iffan) {//为真表示有被选
+                if (bexuan) {
+                    checks.each(function () {//checks：所有的复选框，在完成加载的时候得到
+                        this.checked = false;
+                    });
+                    $("#selectAll").removeAttr("checked", false);
+                } else {
+                    checks.each(function (n, value) {//checks：所有的复选框，在完成加载的时候得到
+                        if (value.checked) {
+                            value.checked = false;
+                        } else {
+                            value.checked = true;
+                        }
+                    });
+                }
+            } else {//没有一个被选
+                checks.each(function () {
+                    this.checked = true;
+                });
+                $("#selectAll").prop("checked", true);
+            }
+        });
+
+        function deleteUserById(userId, userName) {//删除 USerById
+            layer.confirm("是否删除_" + userName + "_用户", { icon: 3, title: '提示' }, function (cindex) {
+                layer.close(cindex);//确认区域
+                $.post("/main/deleteUserById", { userId: userId },
+                    function (result) {
+                        if (result) {
+                            deleteid = true;
+                            layer.msg("成功删除！", { time: 1000, icon: 6, shift: 6 });
+                            initUserData(numPage);//成功删除之后加载当前页的数据
+                        } else {
+                            layer.msg("删除失败！", { time: 1000, icon: 5, shift: 6 });
+                        }
+                    }
+                );
+            }, function (cindex) {//否定区域
+                layer.close(cindex);
+                //取消就返回
+            });
+        }
+
+        $("#deleteAll").click(function () {//点击批量选择删除
+            var ids = "";
+            //方法一
+            var count = 0;
+            checks.each(function (n, value) {//方法一，得到数据，是以字符串对象得到
+                if (value.checked) {
+                    if (count != 0) {//是否被选中
+                        ids += "_";
+                    }
+                    ids += value.id;
+                    count++;
+                }
+            });
+            if (ids == "") {
+                layer.msg("请选择需要删除的用户！", { time: 1000, icon: 5, shift: 6 });
+                return;
+            }
+            //方法二
+            // var userIdList = {};//空的JSON对象,里面封装data数组，进行多条数据传输，每条数据是一个实体对象
+            // checks.each(function (n, value) {//方法一，得到数据，是以JSON对象
+            //     if (value.checked) {
+            //         /* userlist["userlist[0].id"] = value.id; */
+            //         userIdList["userlist[" + n + "]"] = value.id;
+            //     }
+            // });
+            // console.log(userIdList);
+            // //发送请求
+            // if (JSON.stringify(userIdList) == "{}") {
+            //     layer.msg("请选择需要删除的用户！", { time: 1000, icon: 5, shift: 6 });
+            //     return;
+            // }
+            layer.confirm("确认删除？", { icon: 2, title: '警告' }, function (cindex) {//询问是否删除
+                layer.close(cindex);
+                /* $.post("/user/deleteUsers.do" , ids , function(result) { *///以字符串的形式封装传输
+                $.post("/main/deleteUserListByIds", { ids: ids }, function (result) { //以JSON对象数组方式封装传输
+                    if (result) {
+                        layer.msg("成功 删除！", { time: 1000, icon: 6, shift: 6 });
+                        deleteid = true;//用于表示是否显示查询成功
+                        if (numPage == 2) {//如果剩余两页，那么跳转到第一页
+                            initUserData(1);
+                        } else {//否则调转到相关页面
+                            initUserData(numPage);
+                        }
+                    } else {
+                        layer.msg("删除失败！", { time: 1000, icon: 5, shift: 6 });
+                    }
+                });
+            }, function (cindex) {//取消
+                layer.close(cindex);
+                return;
+            });
+        });
+
+        $("#queryButton").click(function () {
+            var userName = $("#userName");
+            var tel = $("#tel");
+            if ($.trim(userName.val()) != "" | $.trim(tel.val()) != "") {
+                $.post("/main/queryUserByNameOrTel", { userName: userName.val(), tel: tel.val() }, function (result) {
+                    removes();//删除 tbody
+                    result.forEach(tbodyPage);/* 添加role数据 */
+                    layer.msg("查询成功！", { time: 1000, icon: 5, shift: 6 });
+                }).error(function () {
+                    layer.msg("拉取数据失败！", { time: 1000, icon: 5, shift: 6 });
+                })
+            } else {
+                layer.msg("请输入查询信息！", { time: 1000, icon: 5, shift: 6 });
+            }
+        })
+
+        function exit() {
+            window.location.href = "/";
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户基本信息</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <div class="layui-col-lg2 layui-col-xs2" style="width: 16%">
+            <blockquote class="layui-elem-quote">基本信息</blockquote>
+        </div>
+        <div class="layui-col-lg10 layui-col-xs10" style="width: 82%; margin-left: 1%">
+            <blockquote class="layui-elem-quote">详细信息</blockquote>
+        </div>
+    </div>
+    <div class="layui-row" id="user-info">
+        <div class="layui-col-lg2" style="width: 16%">
+            <div class="layui-row">
+                <div class="layui-col-lg12">
+                    <img src="" class="img" title=""
+                         style="width: 100%;height: 250px"/>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-lg12">
+                    <input id="upfFile" type="file" style="display: none">
+                    <button onclick="upLoadFile()" style="float: right" type="button"
+                            class="layui-btn layui-btn-xs layui-btn-fluid">上传头像
+                    </button>
+                </div>
+                <div class="layui-col-lg12" style="font-size: 18px;padding-top: 10px">
+                            <span><i class="layui-icon layui-icon-username"
+                                     style="font-size: 22px; color: #1E9FFF;"></i>
+                                &nbsp;{{userName}}
+                            </span>
+                    <span style="float: right">
+                                <i class="layui-icon layui-icon-tabs" style="font-size: 22px; color: #1E9FFF;"></i>
+                        &nbsp;普通人员</span>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-lg10" style="width: 83%; margin-left: 1%">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: auto">登录名：</label>
+                    <div class="layui-form-mid layui-word-aux">{{userInfo.loginName}}</div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-inline" style="width: auto">
+                        <label class="layui-form-label" style="width: auto">用户名：</label>
+                        <div class="layui-input-inline" v-if="editFlag">
+                            <input onblur="editUserName()" v-model="userInfo.userName" type="text" id="userName" name="userName"
+                                   placeholder="请输入用户名" class="layui-input">
+                        </div>
+                        <div class="layui-input-inline" v-else>
+                            <div  @dblclick="editUserName" class="layui-form-mid layui-word-aux">{{userInfo.userName}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: auto">创建日期：</label>
+                    <div class="layui-form-mid layui-word-aux">{{userInfo.createTime}}</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: auto">角色：</label>
+                    <div class="layui-form-mid layui-word-aux">普通用户</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: auto; color: red">
+                        <i class="glyphicon glyphicon-info-sign"></i>&nbsp;“用户名”-可双击修改</label>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/layui/layui.all.js"></script>
+
+<script src="/js/vue/vue.min.js"></script>
+<script>
+
+    var user_info = new Vue({
+        el: '#user-info',
+        data: {
+            userName: '请设置！',
+            img: '/images/mrtx.jpg',
+            userInfo: {},
+            editFlag: false,
+        },
+        methods: {
+            setUserImg: function () {
+                $('.img').attr('src', this.img);
+            },
+            getSessionUser: function () {
+                $.post("/getSessionUser", function (result) {
+                    if (result.user) {
+                        var userInfo = result.user;
+                        user_info.userInfo = userInfo;
+                        user_info.userName = userInfo.userName;
+                        user_info.img = userInfo.img;
+                        user_info.setUserImg();
+                        //设置父窗口的img
+                        window.parent.setUserInfo(user_info.img, user_info.userName);
+                    }else {
+                        window.top.layer.alert('登录超时！', function () {
+                            window.top.location.href= '/login'
+                        })
+                    }
+                })
+                this.editFlag = false;
+            },
+            editUserName: function () {
+                this.editFlag = true;
+                setTimeout(function(){
+                    $('#userName').focus();
+                },50)
+
+            }
+        },
+    })
+    user_info.setUserImg();
+    user_info.getSessionUser();
+</script>
+<script>
+
+    $(function () {
+        window.parent.authHeight($(window).height());
+    })
+
+    function editUserName() {
+        $.post("/averageUser/updateUserInfo", {userName: $('#userName').val()}, function (data) {
+            if (data.flage) {
+                window.top.layer.msg("更新成功！", {icon: 6})
+                //更新session-user
+                user_info.getSessionUser();
+            } else {
+                window.top.layer.msg("更新失败！", {icon: 5})
+            }
+        })
+    }
+    
+    function upLoadFile() {
+        $('#upfFile').click();
+    }
+
+    $('#upfFile').on('change', function () {
+        var file = $(this);
+        var file_fix = file[0].value;
+        if (!/.(gif|jpg|jpeg|png|GIF|JPG|bmp)$/.test(file_fix)) {
+            layer.msg("图片类型必须是.gif,jpeg,jpg,png,bmp中的一种", {time: 1500, icon: 5, shift: 6});
+            return false;
+        } else {
+            if (((file[0].size).toFixed(2)) >= (2 * 1024 * 1024)) {
+                layer.msg("请上传小于2M的图片", {time: 1500, icon: 5, shift: 6});
+                return false;
+            }
+        }
+        $(".img").attr("src", URL.createObjectURL(file[0].files[0]));
+        var formData = new FormData();
+        formData.append("upFile", file[0].files[0]);    //生成一对表单属性
+        $.ajax({
+            type: "POST",           //因为是传输文件，所以必须是post
+            url: '/uploadFile',         //对应的后台处理类的地址
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {//上传文件成功之后，得到文件名，和系统的 uuid
+                if (data.flage) {
+                    var fileName = data.fileName;
+                    $.post("/averageUser/updateUserInfo", {img: fileName}, function (data) {
+                        if (data.flage) {
+                            window.top.layer.msg("更新图片成功！", {icon: 6})
+                            //更新session-user
+                            user_info.getSessionUser();
+                        } else {
+                            window.top.layer.msg("上传头像失败！", {icon: 5})
+                        }
+                    })
+                } else {
+                    window.top.layer.msg("上传头像失败！", {icon: 5})
+                }
+            }
+        });
+        addform.upFileFlage = false;
+    });
+</script>
+</body>
+</html>

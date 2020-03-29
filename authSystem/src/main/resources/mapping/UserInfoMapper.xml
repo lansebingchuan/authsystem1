@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zht.dao.UserInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.zht.bean.UserInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="loginName" property="loginName" jdbcType="VARCHAR" />
+    <result column="userName" property="userName" jdbcType="VARCHAR" />
+    <result column="role" property="role" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="img" property="img" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, uuid, createTime, loginName, userName, role, password, img
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from userinfo
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from userinfo
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.zht.bean.UserInfo" >
+    insert into userinfo (id, createTime, loginName, 
+      userName, role, password, 
+      img)
+    values (#{id,jdbcType=INTEGER}, #{createtime,jdbcType=TIMESTAMP}, #{loginName,jdbcType=VARCHAR},
+      #{userName,jdbcType=VARCHAR}, #{role,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+      #{img,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zht.bean.UserInfo" useGeneratedKeys="true" keyProperty="id">
+    insert into userinfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="loginName != null" >
+        loginName,
+      </if>
+      <if test="userName != null" >
+        userName,
+      </if>
+      <if test="role != null" >
+        role,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="img != null" >
+        img,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginName != null" >
+        #{loginName,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null" >
+        #{role,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="img != null" >
+        #{img,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zht.bean.UserInfo" >
+    update userinfo
+    <set >
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginName != null" >
+        loginName = #{loginName,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        userName = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null" >
+        role = #{role,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="img != null" >
+        img = #{img,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zht.bean.UserInfo" >
+    update userinfo
+    set createTime = #{createtime,jdbcType=TIMESTAMP},
+      loginName = #{loginName,jdbcType=VARCHAR},
+      userName = #{userName,jdbcType=VARCHAR},
+      role = #{role,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      img = #{img,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getUserByPassword" resultType="UserInfo">
+    select DISTINCT a.*
+    <!--<if test="role != null and  role == 'admin'.toString() ">-->
+      , c.sysUuid
+<!--    </if>-->
+    FROM userinfo a
+    LEFT JOIN user_system c on c.userid = a.id
+    where a.loginName = #{loginName} and a.password = #{password}
+    <if test="role != null">
+      and a.role = #{role}
+    </if>
+  </select>
+
+  <select id="judgeLoginName" resultType="UserInfo">
+    select
+    a.*
+    from userinfo a
+    where loginName = #{loginName}
+  </select>
+
+  <select id="getUserByUuid" resultType="UserInfo">
+    SELECT a.* FROM userinfo a
+    WHERE a.password=#{password} AND a.loginName=#{loginName} AND a.uuid=#{uuid}
+  </select>
+
+  <select id="countUserSysManager" resultType="int">
+    SELECT COUNT(*) count FROM (
+    SELECT a.*, c.roleNames FROM user_system d
+    LEFT JOIN userinfo a on a.id = d.userId
+    LEFT JOIN(
+    SELECT a.id, GROUP_CONCAT(c.name) roleNames FROM userinfo a
+    LEFT JOIN userinfo_role b on b.userid = a.id
+    LEFT JOIN role c on c.id = b.roleid
+    WHERE c.sysUuid = #{sysUuid}
+    GROUP BY a.id
+    ) c on c.id = a.id
+    where d.sysUuid = #{sysUuid}
+    <if test="userInfo.userName!=null">and a.userName like concat("%",#{userInfo.userName} ,"%")</if>
+    <if test="userInfo.role!=null">and a.role = #{userInfo.role}</if>
+    ) a
+  </select>
+  <select id="pageUserSysManager" resultType="UserInfo">
+    SELECT a.*, d.sysUuid, IFNULL(c.roleNames, '暂无角色') roleNames FROM user_system d
+    LEFT JOIN userinfo a on a.id = d.userId
+    LEFT JOIN(
+    SELECT a.id, GROUP_CONCAT(c.name) roleNames FROM userinfo a
+    LEFT JOIN userinfo_role b on b.userid = a.id
+    LEFT JOIN role c on c.id = b.roleid
+    WHERE c.sysUuid = #{sysUuid}
+    GROUP BY a.id
+    ) c on c.id = a.id
+    where d.sysUuid = #{sysUuid}
+    <if test="userInfo.userName!=null">and a.userName like concat("%",#{userInfo.userName} ,"%")</if>
+    <if test="userInfo.role!=null">and a.role = #{userInfo.role}</if>
+    LIMIT #{startIndex},#{pageSize}
+  </select>
+
+  <delete id="delUserByIds" parameterType="java.lang.Integer">
+    delete from userinfo where id in
+    <foreach collection="listIds" open="(" close=")" separator="," item="id">
+      #{id}
+    </foreach>
+  </delete>
+
+
+</mapper>

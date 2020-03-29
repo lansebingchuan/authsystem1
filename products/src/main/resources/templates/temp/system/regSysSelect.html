@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册系统选择</title>
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-row" style="padding: 0 10px">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>系统选择</legend>
+    </fieldset>
+
+    <div class="layui-form">
+        <table class="layui-table">
+            <colgroup>
+                <col width="35">
+                <col width="150">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>系统名称</th>
+                <th>系统地址</th>
+                <th>系统描述</th>
+                <th>发布人</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/layui/layui.all.js"></script>
+<script>
+
+    function submitForm() {
+        return getCheckboxValues();
+    }
+
+    function getCheckboxValues() {
+        debugger
+        var sysRegs = [];
+        var checkboxs = $('tbody input[type="checkbox"]');
+        $(checkboxs).each(function (index, ck) {
+            var flag = $(ck)[0].checked;
+            if (flag) {
+                var sysReg = {}
+                sysReg.sysUuid = $(ck).val();
+                sysReg.sysRegName = $(ck).attr("sysRegName")
+                sysRegs.push(sysReg);
+            }
+        })
+        return sysRegs;
+    }
+
+
+</script>
+
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer;
+
+        initIndexSysTemDate();
+
+
+        function initIndexSysTemDate() {
+            $.post("/index/initIndexSysTemDate", {}, function (result) {
+                debugger
+                var sysReglist = result;
+                var tbody = $("tbody");
+                $(sysReglist).each(function (index, sysReg) {
+                    var td = '<tr></tr><td><input type="checkbox" sysRegName="'+sysReg.sysName+'" name="sysId" value="' + sysReg.sysUuid + '" lay-skin="primary"></td>\n' +
+                        '                <td>' + sysReg.sysName + '</td>\n' +
+                        '                <td>' + sysReg.sysUrl + '</td>\n' +
+                        '                <td>' + sysReg.sysDescribed + '</td>\n' +
+                        '                <td>' + sysReg.userName + '</td></tr>';
+                    tbody.append(td);
+                    form.render();
+                })
+
+            })
+        }
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>统一认证权限系统</title>
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@bootcss/www.bootcss.com@0.0.3/dist/css/site.min.css" rel="stylesheet">
+    <link href="/css/oneself/globalCss.css" rel="stylesheet">
+    <style>
+        /*vue 模板没有加载完成时默认隐藏*/
+        [v-cloak] {
+            display: none;
+        }
+
+    </style>
+</head>
+<body onload="initIndexSysTemDate()">
+<header class="navbar navbar-inverse navbar-fixed-top" id="top" style="">
+    <div class="container">
+        <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="#" class="navbar-brand">Certificate Authority</a>
+        </div>
+        <nav id="bs-navbar" class="collapse navbar-collapse">
+            <ul  v-cloak class="nav navbar-nav navbar-right" v-if="flage">
+                <li><a href="#" target="_self">欢迎您：{{user.userName}}</a></li>
+                <li v-if="user.role === 'admin'">
+                    <a href="/main" target="_self">我要管理</a>
+                </li>
+                <li v-else>
+                    <a href="/averageUser/main" target="_self">我要管理</a>
+                </li>
+                <li><a href="/login" target="_self">切换登录</a></li>
+            </ul>
+            <ul  v-cloak class="nav navbar-nav navbar-right" v-else>
+                <li><a href="/login" target="_self">登录</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<div class="container projects">
+    <div class="projects-header page-header">
+        <h2>统一认证权限系统</h2>
+        <p>便捷、快速、优雅的访问你需要的资源</p>
+    </div>
+    <div class="row" id="sysDiv">
+
+    </div>
+</div>
+<hr>
+<footer class="footer ">
+    <div class="container">
+        <div class="row footer-top">
+            <div class="col-md-6 col-lg-6">
+                <div class="row">
+                    <div class="col-md-6 col-lg-6"></div>
+                    <div class="col-md-6 col-lg-6">
+                        <img src="/images/index/syslog.jpg" width="100px" style="margin-left: 50px">
+                        <p>一直致力于提供更便捷的上网方式！</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6  col-lg-5 col-lg-offset-1">
+                <div class="row about">
+                    <div class="col-sm-3">
+                        <h4>关于</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="javaScript:void(0)">使用技巧</a></li>
+                            <li><a href="javaScript:void(0)">新手引导</a></li>
+                            <li><a href="https://www.baidu.com">友情链接</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <hr>
+        <div class="row footer-bottom">
+            <ul class="list-inline text-center">
+                <li><a href="javaScript:void(0)" target="_blank">Copyright © 2019-2020</a></li><li>吾爱权限网</li>
+            </ul>
+        </div>
+    </div>
+</footer>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/css/bootstrap/js/bootstrap.js"></script>
+<script src="/js/jquery/layer/layer.js"></script>
+<script src="/js/vue/vue.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/index.js"></script>
+</body>
+</html>

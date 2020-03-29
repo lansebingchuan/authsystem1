@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zht.dao.RoleMapper" >
+  <resultMap id="BaseResultMap" type="com.zht.bean.Role" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sysUuid" property="sysUuid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, sysUuid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from role
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from role
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.zht.bean.Role" >
+    insert into role (id, name, sysUuid
+      )
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{sysUuid,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zht.bean.Role" >
+    insert into role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="sysUuid != null" >
+        sysUuid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sysUuid != null" >
+        #{sysUuid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zht.bean.Role" >
+    update role
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sysUuid != null" >
+        sysUuid = #{sysUuid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zht.bean.Role" >
+    update role
+    set name = #{name,jdbcType=VARCHAR},
+      sysUuid = #{sysUuid,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="addSelectSysRole">
+    <foreach collection="roleList" item="role" separator=";">
+      insert into role (name, sysUuid)
+      values ( #{role.name}, #{role.sysUuid})
+    </foreach>
+  </insert>
+  <select id="listAllRolesBySysUuid" parameterType="java.lang.String" resultType="Role">
+    select * from role where sysUuid = #{sysUuid}
+  </select>
+  <select id="listUserRole"  resultType="Role">
+    SELECT b.*, a.id userRoleId from userinfo_role a
+    LEFT JOIN role b on b.id = a.roleid
+    WHERE userid = #{id} and b.sysUuid=#{sysUuid}
+  </select>
+
+  <select id="countRoleSize" resultType="java.lang.Integer">
+     SELECT count(*) FROM role WHERE sysUuid=#{sysUuid}
+  </select>
+
+  <select id="pageQueryRole" resultType="Role">
+     SELECT * FROM role WHERE sysUuid=#{sysUuid}
+      LIMIT #{startIndex}, #{pageSize}
+  </select>
+
+  <select id="getRoleListBySysUuid" resultType="Role">
+    SELECT * FROM role WHERE sysUuid=#{sysUuid}
+  </select>
+</mapper>

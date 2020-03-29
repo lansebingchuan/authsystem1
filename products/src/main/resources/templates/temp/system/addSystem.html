@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>添加系统</title>
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8 col-md-8 main">
+            <ol class="breadcrumb">
+                <li><a href="#">数据列表</a></li>
+                <li class="active">新增</li>
+            </ol>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>增加系统</h4>
+                    <div style="float:right;cursor:pointer;margin-top: -30px;" data-toggle="modal"
+                         data-target="#myModal"><i class="glyphicon glyphicon-question-sign"></i></div>
+                </div>
+                <div class="panel-body">
+                    <form role="form" id="addform" action="/addSystem" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label style="color: red">*</label>
+                            <label for="sysName">系统名称：</label>
+                            <input name="sysName" type="text" v-model="sysName" class="form-control"
+                                   id="loginName" placeholder="请输入系统名称">
+                            <p v-show="sysNameFlage" class="help-block label label-warning">系统名称输入4-7个字符
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: red">*</label>
+                            <label for="sysUrl">系统url地址：</label>
+                            <input name="sysUrl" type="text" v-model="sysUrl" class="form-control" id="sysUrl"
+                                   placeholder="系统url地址">
+                            <p v-show="sysUrlFlage" class="help-block label label-warning">请输入正确的url地址
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: red">*</label>
+                            <label for="sysDescribed">系统描述：</label>
+                            <input name="sysDescribed" type="text" v-model="sysDescribed" class="form-control" id="sysDescribed"
+                                   placeholder="系统描述">
+                            <p v-show="sysDescribedFlage" class="help-block label label-warning">请输入10个汉字字符的系统描述
+                            </p>
+                        </div>
+                        <div  class="form-group">
+                            <label style="color: red">*</label>
+                            <label for="sysType">系统类型：</label>
+                            <input name="sysTypeId" type="text" v-model="sysTypeId" class="form-control" id="sysTypeId"
+                                   style="display: none">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{sysTypeName}} <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="dropdownMenu">
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <input name="fileName" type="text" v-model="fileName" class="form-control" id="fileName" style="display: none">
+                            <input name="sysUuid" type="text" v-model="sysUuid" class="form-control" id="sysUuid" style="display: none">
+                        </div>
+                        <div class="form-group">
+                            <input type="file" name="upFile" style="display: none" id="upFile" onchange="Javascript:validate_img(this);">
+                            <button id="addFile" type="button" @click="upFile()" class="btn btn-primary"><i
+                                    class="glyphicon glyphicon-file" ></i> 上传系统文件</button>
+                            <p v-show="upFileFlage" class="help-block label label-warning">请选择上传一个标识系统的图片
+                            </p>
+                        </div>
+                        <button id="useradd" type="button" @click="toAddSys()" class="btn btn-success"><i
+                                class="glyphicon glyphicon-plus"></i> 新增</button>
+                        <button id="resetButton" type="button" class="btn btn-danger"><i
+                                class="glyphicon glyphicon-refresh"></i> 重置</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4 main">
+            <div>
+                <img src="/" class="img" title="" style="width: 100%;height: auto"/>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/common.js"></script>
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script>
+
+    function chooseSysType(id , sysTypeName) {
+        debugger
+        addform.sysTypeId = id;
+        addform.sysTypeName = sysTypeName;
+    }
+    var addform = new Vue({//表单控件部分
+        el: "#addform",
+        data: {
+            sysName: "",//系统名称
+            sysNameFlage: false,//
+            sysUrl: "",//url地址
+            sysDescribed: "",//系统描述
+            sysUrlFlage: false,
+            upFileFlage: false,
+            sysDescribedFlage: false,
+            sysTypeId:'',
+            sysTypeName:'',
+            fileName: '',
+            sysUuid: '',
+            serverData:{},
+        },
+        methods: {
+            toAddSys: function () {//增加人员
+                if (this.sysName != "" && this.sysUrl != ""
+                    && !this.sysNameFlage && !this.sysUrlFlage && !this.upFileFlage) {
+                    $.ajaxSettings.async = false;//设置为同步
+                    $.post("/addSystem", $("#addform").serialize(), function (data) {
+                        layer.msg("注册系统成功，请点击下一步！", { time: 1500, icon: 6, shift: 6 }, function () {
+                        });
+                        addform.serverData = data;
+                    }).error(function () {
+                        layer.msg("注册系统失败！", { time: 1500, icon: 5, shift: 6 }, function () {
+                        });
+                    });//判断用户名
+                    $.ajaxSettings.async = true;//设置为同步
+                } else {
+                    layer.msg("检查信息填写完整！", { time: 1500, icon: 3, shift: 6 }, function () {
+                    });
+                }
+            },
+            upFile: function () {
+                $("#upFile").click();
+            },
+        },//监听器判断值输入合法性
+        watch: {//表示监听器，监听某个值是否改变了，那么就做事情
+            sysName: function (newvalue, oldvalue) {
+                if ("" != newvalue) {
+                    var regex = /^[\u4e00-\u9fa5]{4,}$/;
+                    var result = regex.test(newvalue);
+                    if (result && newvalue.length >= 4 && newvalue.length <= 8) {
+                        this.sysNameFlage = false;
+                    } else {
+                        this.sysNameFlage = true;
+                    }
+                }
+            },
+            sysUrl: function (newvalue, oldvalue) {
+                const regex = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;;
+                const result = regex.test(newvalue);
+                if (result) {
+                    this.sysUrlFlage = false;
+                } else {
+                    this.sysUrlFlage = true;
+                }
+            },
+            sysDescribed: function (newvalue, oldvalue) {
+                var regex = /^[\u4e00-\u9fa5]{10,}$/;
+                var result = regex.test(newvalue);
+                if (result && newvalue.length >= 10) {
+                    this.sysDescribedFlage = false;
+                } else {
+                    this.sysDescribedFlage = true;
+                }
+            }
+        }
+    });
+
+    var dropdownMenu = $("#dropdownMenu");
+    initSysType();//初始化系统类型
+    function initSysType() {
+        $.post("/listAllSysType" , {} , function (data) {
+            if (data.flage){
+                var sysTypeList = data.sysTypeList;
+                $.each(sysTypeList , function (index , sysType) {
+                    var li = '<li onclick="chooseSysType('+sysType.id+','+'\''+sysType.sysTypeName+'\''+')"><a href="#">'+sysType.sysTypeName+'</a></li>';
+                    $(dropdownMenu).append(li);
+                })
+                addform.sysTypeId = sysTypeList[0].id;
+                addform.sysTypeName = sysTypeList[0].sysTypeName;
+            }
+        })
+    }
+
+    function validate_img(ele){
+        var file = ele.value;
+        if(!/.(gif|jpg|jpeg|png|GIF|JPG|bmp)$/.test(file)){
+            layer.msg("图片类型必须是.gif,jpeg,jpg,png,bmp中的一种" ,{ time: 1500, icon: 5, shift: 6 });
+            addform.upFileFlage = true;
+            return false;
+        }else{
+            if(((ele.files[0].size).toFixed(2))>=(2*1024*1024)){
+                layer.msg("请上传小于2M的图片", { time: 1500, icon: 5, shift: 6 });
+                addform.upFileFlage = true;
+                return false;
+            }
+        }
+        $(".img").attr("src",URL.createObjectURL(ele.files[0]));
+        var formData = new FormData();
+        formData.append("upFile", ele.files[0]);    //生成一对表单属性
+        $.ajax({
+            type: "POST",           //因为是传输文件，所以必须是post
+            url: '/uploadFile',         //对应的后台处理类的地址
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {//上传文件成功之后，得到文件名，和系统的 uuid
+                if (data.flage){
+                    addform.fileName = data.fileName;
+                    addform.sysUuid = data.sysUuid;
+                }
+            }
+        });
+        addform.upFileFlage = false;
+    }
+
+    function submitForm() {
+        addform.toAddSys();
+        return addform.serverData;//上传系统之后，服务器返回的数据
+    }
+</script>
+</body>
+</html>

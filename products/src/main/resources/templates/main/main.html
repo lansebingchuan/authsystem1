@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>后台管理</title>
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/js/layui/css/layui.css">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" id="header1">
+        <div class="layui-logo" onclick="toMain()" style="cursor: pointer">我的仓库</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="/images/mrtx.jpg" class="layui-nav-img" id="userImg">
+                    {{user.userName}}
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="#"  onclick="showUserDetail()">基本资料</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="#" onclick="exit()">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="" href="javascript:;">基本信息</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;" id="userDetailed">用户信息</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item  layui-nav-itemed">
+                    <a href="javascript:;">购物车</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;" onclick="atCartProduct()">已添加购物</a></dd>
+                        <dd><a href="javascript:;" onclick="atSendProduct()">派送中</a></dd>
+                        <dd><a href="javascript:;" onclick="completeProduct()">已完成订单</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item  layui-nav-itemed">
+                    <a href="javascript:;">产品管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;" onclick="myProduct()">我的商品</a></dd>
+                        <dd><a href="javascript:;" onclick="addProduct()">产品发布</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="row" id="message">
+                <div class="col-md-12" style="">
+                    <h1>数据列表</h1>
+                    <hr>
+                </div>
+                <div class="col-md-12" style="">
+                    <div style=' width: 20px;height: 500px; letter-spacing: 20px;color: rgb(6, 96, 180);'>
+                        <h1>欢</h1>
+                        <h1>迎</h1>
+                        <h1>您</h1>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row" id="content">
+                <iframe src="" id="myFrame" scrolling="auto" style="width: 100%;border:none" frameborder="0">
+
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © farmers.com - 一直致力于提供便捷的生鲜购物方式！
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/layui/layui.js"></script>
+
+<script src="/js/vue/vue.min.js"></script>
+<script>
+    var myFrame = $("#myFrame");
+
+    function authIframeWidth() {
+        myFrame.attr("height" , $(window).height()- $(window).height()*0.17)
+    }
+</script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function(){
+        var element = layui.element;
+
+
+    });
+</script>
+<script>
+    //JavaScript代码区域
+    var header1 = new Vue({
+        el: '#header1',
+        data:{
+            user: {userName: '暂无', icon: ''}
+        },
+        methods:{
+            setUserImg: function () {
+                $('#userImg').attr('src', this.user.icon);
+            },
+            getSessionUser: function () {
+                var that = this;
+                $.post("/main/getSessionUser", function (result) {
+                    if (result.user) {
+                        header1.user= result.user;
+                        header1.setUserImg();
+                    }else {
+                        window.top.layer.alert('登录超时！', function () {
+                            window.top.location.href= '/login'
+                        })
+                    }
+                })
+                this.editFlag = false;
+            },
+        },
+    });
+</script>
+<script>
+
+    /**
+     * 退出到首页
+     */
+    function exit() {
+        window.location.href = "/";
+    }
+
+    /**
+     * 正在购物车页面
+     *
+     */
+    function atCartProduct(){
+        $("#message").hide();
+        $("#content").show();
+        myFrame.attr("src", "/main/atCartProduct")
+    }
+    /**
+     * 正在发货页面
+     *
+     */
+    function atSendProduct(){
+        $("#message").hide();
+        $("#content").show();
+        myFrame.attr("src", "/main/atSendProduct")
+    }
+    /**
+     * 已完成订单
+     *
+     */
+    function completeProduct(){
+        $("#message").hide();
+        $("#content").show();
+        myFrame.attr("src", "/main/completeProduct")
+    }
+
+    /**
+     * 添加商品
+     *
+     */
+    function addProduct(){
+        $("#message").hide();
+        $("#content").show();
+        myFrame.attr("src", "/product/addProductPage")
+    }
+
+    /**
+     * 我的商品
+     *
+     */
+    function myProduct(){
+        $("#message").hide();
+        $("#content").show();
+        myFrame.attr("src", "/product/myProduct")
+    }
+
+    /**
+     * 用户详细信息
+     */
+    $("#userDetailed").on("click",function () {
+        showUserDetail();
+    });
+
+    /**
+     * 用户详细信息
+     */
+    function showUserDetail() {
+        $("#message").hide();
+        $("#content").show();
+        myFrame.attr("src", "/main/userDetailedPage")
+    }
+
+    //设置user
+    function setUser(user_info) {
+        header1.user = user_info;
+        header1.setUserImg();
+    }
+
+    /**
+     * 去主页
+     */
+    function toMain(){
+        window.location.href = "/main/main"
+    }
+
+    //顶部获取user
+    header1.getSessionUser();
+</script>
+</body>
+</html>

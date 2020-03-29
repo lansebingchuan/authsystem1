@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>人员管理</title>
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+    <link href="/js/jquery/pagination/pagination.css" rel="stylesheet">
+</head>
+<style>
+    html,
+    body {
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body onload="showDate()">
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+<div class="container-fluid" id="tree">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 65px;">
+            <div class="tree">
+                <ul id="menu_tree">
+                    <!--左侧权限控制导航栏-->
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-10" style="margin-top: 55px;">
+            <!--margin-top: 25px;-->
+            <div class="row">
+                <div class="col-md-12" style="margin-top: 5px">
+                    <h1>数据列表</h1>
+                    <hr>
+                </div>
+                <div class="col-md-12" style="">
+                    <div class="panel-body">
+                        <button id="newadd" type="button" class="btn btn-primary" style="float:right;"
+                                onClick="addSysRole()"><i class="glyphicon glyphicon-plus"></i> 新增</button>
+                        <br>
+                        <hr style="clear:both;">
+                        <div class="table-responsive">
+                            <table class="table  table-bordered">
+                                <thead>
+                                <tr>
+                                    <th width="50">序号</th>
+                                    <th>系统编号</th>
+                                    <th>名称</th>
+                                    <th width="100">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="pageUser">
+
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="7" align="center">
+                                        <ul class="pagination" id="parentPotion">
+                                            <div id="Pagination" class="pagination">
+                                                <!-- 这里显示分页 -->
+                                            </div>
+                                        </ul>
+                                    </td>
+                                </tr>
+
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/leftMenu.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script>
+    //控制点击的什么栏显示
+    var pathname = window.location.pathname;
+    $(menuTree).find("dl a[href=\'" + pathname + "\']").parent().attr("class", "layui-nav-item layui-this");
+</script>
+<script>
+
+
+    var totalPage = 0;//总页数
+    var pageLength;//每页的数量
+    var data = { "pagePoint": 1, "pageSize": 2 };
+    var deleteid = false; //是否删除
+    var query = false;//表示是否查询
+    var numPage = 0 ;//当前页面
+    var checks;  //所有的复选框
+    $(initRoleManageData());
+
+    function initRoleManageData(index) {
+        if (!index) {//不存在默认查询第一页
+            index=1;
+        }else {
+            if (deleteid) {//表示删除了，还是查询当前页
+
+            }else {
+                index = index + 1;
+            }
+        }
+        if (numPage == index && $.trim(data.userName) == "" && $.trim(data.role) == "") {//如果在当前页,如果查询的为空
+            if (!deleteid) {//并且没有删除，那么返回
+                return;
+            }
+        }
+
+        numPage = index;//当前页
+        data.pagePoint = numPage;//传到后台的当前页
+        $.ajax({
+            type: "get",
+            url: "/listRoleManager",
+            data: data,
+            success: function (result) {
+                if (result.flage) {//查询成功
+                    removes();//移除之前的元素
+                    if (!deleteid && !query) {//没有进行其他的操作，表示查询成功
+                        layer.msg("信息查询成功！", { time: 1000, icon: 6, shift: 6 });
+                    }
+                    deleteid = false;//恢复
+                    var page = result.page;
+                    totalPage = page.totalPage;//总共的页数
+                    var lists = page.lists;
+                    pageLength = lists.length;//每页数量，判断是否删除完了
+                    if (lists.length > 0) {
+                        lists.forEach(tbodyPage);/* 添加role数据 */
+                        checks = $("tbody tr td input[type=checkbox]");//得到所有的复选框
+                        if (query) {
+                            layer.msg("检索成功！", { time: 1000, icon: 6, shift: 6 });
+                            query = false;//恢复
+                        }
+                    } else {//当前的页数量没有
+                        numPage = numPage - 1;//数量页号减
+                    }
+                    //TotalPage();//添加页的位置数
+                    // 创建分页
+                    $("#Pagination").pagination(totalPage, {
+                        num_edge_entries: 2, //边缘页数
+                        num_display_entries: 4, //主体页数
+                        callback: initRoleManageData,
+                        current_page: numPage - 1,
+                        items_per_page: 1,//每页显示1项
+                        prev_text: "前一页",
+                        next_text: "后一页"
+                    });
+                } else {//查询失败
+                    layer.msg("查询失败！", { time: 1000, icon: 5, shift: 6 });
+                }
+            },
+            error: function () {
+                layer.msg("查询失败！", { time: 1000, icon: 5, shift: 6 });
+            }
+        });
+    }
+    function removes() {//移除之前的list集合
+        var tbodys = $("tbody");
+        tbodys.empty();//删除所有的管理员
+    }
+    function tbodyPage(value, n) {//渲染页面数据
+        var tbodys = $("tbody");
+        var tr = '<tr>' +
+            '<td>' + (n + 1) + '</td>' +
+            '<td>' + value.sysUuid + '</td>' +
+            '<td>' + value.name + '</td>' +
+            '<td style="width: 150px">' +
+            '<button style="margin-left: 12px" type="button" onclick="editRole('+value.id+',\''+value.name+'\')"  class="btn btn-primary btn-xs"><i class=" glyphicon glyphicon-edit"></i></button>' +
+            '<button style="margin-left: 20px"  type="button" style="margin-left: 20px;" onclick=' + '"deleteRoleById(' + value.id + ',\'' + value.name + '\')"' + ' class="btn btn-danger btn-xs"><i class=" glyphicon glyphicon-remove"></i></button>' +
+            '</td>' +
+            '</tr>';
+        tbodys.append(tr);
+    }
+
+
+    function deleteRoleById(roleId, name) {//删除 USerById
+        layer.confirm("是否删除_" + name, { icon: 3, title: '提示' }, function (cindex) {
+            layer.close(cindex);//确认区域
+            $.post("/deleteRoleById", { roleId: roleId },
+                function (result) {
+                    if (result.flage) {
+                        deleteid = true;
+                        layer.msg("成功删除！", { time: 1000, icon: 6, shift: 6 });
+                        initRoleManageData(numPage);//成功删除之后加载当前页的数据
+                    } else {
+                        if (result.message){
+                            layer.msg(result.message, { time: 1000, icon: 5, shift: 6 });
+                        }else {
+                            layer.msg("删除失败！", { time: 1000, icon: 5, shift: 6 });
+                        }
+
+                    }
+
+                }
+            );
+        }, function (cindex) {//否定区域
+            layer.close(cindex);
+            //取消就返回
+        });
+    }
+
+    //增加角色信息
+    function addSysRole() {
+        openCenterWin("角色设置", "完成", "/addRolePage", function (index, data) {
+            if (data.flage) {
+                deleteid = true;
+                initRoleManageData(numPage)
+                layer.msg("新增角色成功！", { time: 1000, icon: 6, shift: 6 });
+            }
+        });
+    }
+    //更新角色信息
+    function editRole(roleId , roleName) {
+        openCenterWin("更新角色", "更新", "/editRolePage", function (index, data) {
+            if (data.flage) {
+                layer.msg("角色更新成功！", { time: 1000, icon: 6, shift: 6 });
+                deleteid = true;
+                initRoleManageData(numPage);//成功修改之后加载当前页的数据
+            }else {
+                if (data.message) {
+                    layer.msg(data.message, { time: 1000, icon: 5, shift: 6 });
+                }else {
+                    layer.msg("角色更新失败！", { time: 1000, icon: 5, shift: 6 });
+                }
+            }
+        }, {roleId: roleId, roleName: roleName});
+    }
+    function exit() {
+        window.location.href = "/";
+    }
+</script>
+</body>
+
+</html>

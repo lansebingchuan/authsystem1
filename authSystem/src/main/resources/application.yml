@@ -1,0 +1,46 @@
+server:
+  port: 8080 #使用 8000 和 8001 测试多个应用
+spring:
+  application:
+    name: authSystem  #全部小写
+  http:
+      multipart:
+        max-file-size: 2000Mb #上传最大文件容量
+        max-request-size: 2500Mb #最大请求容量
+  freemarker:
+      templateLoaderPath: classpath:/markTemplates/
+      content-type: text/html
+      suffix: .ftl
+      charset: UTF-8
+      #线上为true
+      cache: false
+      allow-request-override: false
+      check-template-location: true
+      expose-request-attributes: false
+      expose-session-attributes: false
+      expose-spring-macro-helpers: false
+
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 500
+      min-idle: 0
+logging: # 配置日志级别，让hibernate打印出执行的SQL
+  level:
+    root: INFO
+    org.hibernate: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
+    com:  #为包名的开始，那个包下面的以dbug打印
+      zht:
+        dao : debug #showSql
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml #配置mybatis的xml扫描位置
+  type-aliases-package: com.zht.bean #实体类
+
+

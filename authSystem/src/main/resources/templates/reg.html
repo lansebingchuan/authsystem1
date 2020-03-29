@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body onload="showDate()">
+<div class="layui-row">
+    <div class="layui-md-12 layui-col-lg12" style="height: 50px">
+        <nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container-fluid" id="top">
+                <div class="navbar-header">
+                    <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse"
+                     style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+                    <div style="float: right;">
+                        <div style="margin-top: -16px;">
+                            <button id="newadd" type="button" class="btn btn-primary"
+                                    style="float:right;padding-bottom: 5px"
+                                    onClick="exit()"><i class="glyphicon glyphicon-off"></i> 返回登录
+                            </button>
+                        </div>
+                    </div>
+                    <div style="float: right;margin-right: 25px;margin-top: -10px"></span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                            id="yearText"></span></div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="layui-col-md8 layui-col-lg4 layui-col-lg-offset4 layui-md-offset-2">
+        <div>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend>用户注册</legend>
+            </fieldset>
+            <form class="layui-form layui-form-pane" action="" id="form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">登录名</label>
+                    <div class="layui-input-block">
+                        <input lay-verify="loginName" type="text" name="loginName" autocomplete="off"
+                               placeholder="请输入登录名"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-block">
+                        <input lay-verify="userName" type="text" name="userName" autocomplete="off"
+                               placeholder="请输入用户名"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-inline">
+                        <input lay-verify="password" type="password" id="password" name="password" placeholder="请输入密码"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-inline">
+                        <input lay-verify="passwordRepeat" type="password" name="passwordRepeat" placeholder="请输入密码"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">请务确认密码输入正确</div>
+                </div>
+                <div class="layui-form-item" pane="">
+                    <label class="layui-form-label">单选框</label>
+                    <div class="layui-input-block" id="role-redio">
+                        <input lay-filter="role-redio" type="radio" class="role-redio" name="role" value="admin" title="管理员" checked>
+                        <input lay-filter="role-redio" type="radio" class="role-redio" name="role" value="averageUser" title="普通用户">
+                    </div>
+                </div>
+                <div class="layui-form-item" id="isSysReg">
+                    <label class="layui-form-label">注册系统</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline">
+                            <input type="text" name="sysRegName" disabled id="sysRegName" placeholder="请选择需注册的系统"
+                                   class="layui-input">
+                        </div>
+                        <div class="layui-input-inline">
+                            <a class="layui-btn" lay-submit="submit" lay-filter="regSysSelect" onclick="regSysSelect()">选择</a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <a class="layui-btn" lay-submit="submit" lay-filter="submit">点我提交注册信息</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/layui/layui.all.js"></script>
+
+<script src="/js/vue/vue.min.js"></script>
+
+<script src="/js/common.js"></script>
+
+<script>
+
+    var sysRegUuid;
+    $('#isSysReg').hide();
+
+    layui.use(['form', 'layedit'], function () {
+
+        var form = layui.form
+            , layer = layui.layer
+        //自定义验证规则
+        form.verify({
+            loginName: function (value) {
+                if (value.length < 1) {
+                    return '用户名不会为空';
+                }
+                var loginNameFlage;
+                $.ajaxSettings.async = false;//设置为同步
+                $.get("/judgeLoginName", { loginName: value }, function (data) {
+                    if (data.flage) {
+                        loginNameFlage = false;
+                    } else {
+                        loginNameFlage = true;
+                    }
+                });//判断用户名
+                $.ajaxSettings.async = true;//设置为同步
+                if (loginNameFlage){
+                    return '用户名已经被注册了！';
+                }
+            }
+            , password: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ],
+            passwordRepeat: function (value) {
+                if (value !== $('#password').val()){
+                    return'两次密码不一致！'
+                }
+            },
+            userName: function (value) {
+                if (value.length < 1) {
+                    return '登录名不会为空';
+                }
+            }
+        });
+
+        //监听提交
+        form.on('submit(submit)', function (data) {
+            var user_info = data.field;
+            user_info.sysRegUuidString = sysRegUuid;
+            $.post("/regUserInfo", user_info, function (data) {
+                if (data.status === 'y'){
+                    layer.msg('注册成功！', {time: 1500});
+                    setInterval(function () {
+                        window.location.href = '/login';
+                    }, 1500);
+                }
+            })
+            return false;
+        });
+
+        //监听单选按钮的选择事件
+        form.on('radio(role-redio)', function(data){
+            var role = data.value; //被点击的radio的value值
+            if (role === 'averageUser'){
+                $('#isSysReg').show();
+            }else {
+                $('#isSysReg').hide();
+            }
+        });
+
+    });
+</script>
+
+<script>
+
+    function showDate() {//显示日期变化
+        var now = new Date();
+        var year = now.getFullYear(); //得到年份
+        var month = now.getMonth() + 1;//得到月份
+        var date = now.getDate();//得到日期
+        // var day = now.getDay();//得到周几
+        var hour = now.getHours();//得到小时数
+        var minute = now.getMinutes();//得到分钟数
+        var second = now.getSeconds();//得到秒数
+        var yearText = year + "-" + month + "-" + date + "  " + hour + ":" + minute + ":" + second
+        document.getElementById("yearText").innerHTML = yearText;
+        setTimeout(showDate, 1000);//定时器一直调用show()函数
+        return "";
+    }
+
+    function exit() {
+        window.location.href = "/login";
+    }
+
+    function showSysTips(param) {
+        debugger
+        layer.tips('只想提示地精准些', param); //在元素的事件回调体中，follow直接赋予this即可
+    }
+
+    /**
+     * 注册系统选
+     */
+    function regSysSelect() {
+        openCenterWin("系统选择", "确认", '/averageUser/regSysSelect' , function (index, data) {
+            var sysRegs = data;
+            var sysRegNames = '';
+            $.each(sysRegs, function (index, sysReg) {
+                if (index === 0){
+                    sysRegUuid = sysReg.sysUuid;
+                    sysRegNames = sysReg.sysRegName;
+                }else {
+                    sysRegNames = sysRegNames + '、' +sysReg.sysRegName;
+                    sysRegUuid = sysRegUuid + '&' + sysReg.sysUuid;
+                }
+            })
+            $('#sysRegName').val(sysRegNames);
+        })
+    }
+</script>
+
+<script>
+
+</script>
+</body>
+</html>

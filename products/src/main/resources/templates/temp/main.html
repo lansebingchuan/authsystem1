@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>排班管理</title>
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+</head>
+<style>
+    html,
+    body {
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body onload="audioBg()">
+<!--播放系统设置下一步的音效-->
+<audio style="display: none" id="audio" src=""></audio>
+<audio style="display: none" id="audioBg" src=""></audio>
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="newadd" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+<div class="container-fluid" id="tree">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 65px;">
+            <div class="tree">
+                <ul id="menu_tree">
+                   <!--左侧权限控制导航栏-->
+                </ul>
+                <ul style="padding-left:0px;display: none" class="list-group" id="noSys">
+                    <li class="list-group-item tree-closed">
+                        <a href="/main.htm"><i class="glyphicon glyphicon-dashboard"></i> 控制面板</a>
+                    </li>
+                    <li class="list-group-item">
+                        <span><i class="glyphicon glyphicon-ok"></i> 录入系统信息 <span class="badge"
+                                                                                  style="float:right">3</span></span>
+                        <ul style="margin-top:10px;display:none;">
+                            <li style="height:30px; width: 130px;" onclick="addSysRole()">
+                                <a href="#"><i class="glyphicon glyphicon-check"></i> 添加角色信息</a>
+                            </li>
+                            <li style="height:30px;" onclick="addSysPermission()">
+                                <a href="#"><i class="glyphicon glyphicon-check"></i> 增加授权路径信息</a>
+                            </li>
+                            <li style="height:30px;" onclick="addRole_Permission()">
+                                <a href="#"><i class="glyphicon glyphicon-check"></i> 分配角色权限</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-10" style="margin-top: 55px;">
+            <!--margin-top: 25px;-->
+            <div class="row">
+                <div class="col-md-12" style="">
+                    <h1>数据列表</h1>
+                    <hr>
+                </div>
+                <div class="col-md-12" style="">
+                    <div style=' width: 20px;height: 500px; letter-spacing: 20px;color: rgb(6, 96, 180);'>
+                        <h1>欢</h1>
+                        <h1>迎</h1>
+                        <h1>您</h1>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/leftMenu.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script>
+    //控制点击的什么栏显示
+    var pathname = window.location.pathname;
+    $(menuTree).find("dl a[href=\'" + pathname + "\']").parent().attr("class", "layui-nav-item layui-this");
+</script>
+<!--控制管理js-->
+<script>
+    $("#menu_tree").hide()
+    $("#noSys").hide()
+    var sysUuid = '' //系统uuid
+    //启动加载页面效果
+    var index = layer.load(0, {shade: [0.6, '#fff']});
+    $(function () {
+        $(".list-group-item").click(function () {
+            if ($(this).find("ul")) {
+                $(this).toggleClass("tree-closed");
+                if ($(this).hasClass("tree-closed")) {
+                    $("ul", this).hide("fast");
+                } else {
+                    $("ul", this).show("fast");
+                }
+            }
+        });
+    });
+
+    function exit() {
+        window.location.href = "/";
+    }
+
+    showDate();///开启时间变化
+    layer.close(index);//关闭加载效果
+
+    //添加系统信息
+    function addSys() {
+        openCenterWin("系统设置", "下一步", "/addSystemPage", function (index, data) {
+            debugger
+            if (data.flage) {
+                sysUuid = data.sysUuid;
+                layer.alert('请务必记住您的系统唯一编号：<br><font style="color:red;font-weight: 700">' + sysUuid + '</font>', {
+                    icon: 4,
+                    title: '提示'
+                }, function (index) {
+                    layer.close(index);
+                    playMusic();
+                    addSysRole(); //增加角色信息
+                });
+            } else {
+                if (data.user) {
+                    layer.alert('登录超时', {icon: 4, title: '提示'});
+                }
+            }
+        });
+    }
+
+    //增加角色信息
+    function addSysRole() {
+        openCenterWin("角色设置", "下一步", "/addRolePage", function (index, data) {
+            if (data.flage) {
+                playMusic();
+                addSysPermission();
+            }
+        });
+    }
+
+    //增加URL路径信息
+    function addSysPermission() {
+        openCenterWin("URL路径信息", "下一步", "/addSysPermissionPage", function (index, data) {
+            if (data) {
+                playMusic();
+                addRole_Permission();
+            }
+        });
+    }
+
+    //分配角色权限
+    function addRole_Permission() {
+        openCenterWin("这是最后一步-分配权限", "完成", "/addRolePermissionPage", function (index, data) {
+            if (data) {
+                layer.alert('已完成所有配置', {icon: 4, title: '提示'}, function (index) {
+                    //增加系统管理员默认角色
+                    $.post("/addUserDefaultRole", {} , function () {
+                        playMusic();
+                        window.location.reload();//重新加载页面，刷新权限
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+    }
+
+    flageHasSys();
+    //判断是否注册系统
+    function flageHasSys() {
+        $.get("/flageUserHasSystem", {}, function (resultdata) {
+            if (resultdata.flage) {
+                $("#menu_tree").show()
+                $("#noSys").hide()
+            } else {
+                if (resultdata.userInfo) {//登录超时
+                    return
+                }
+                $("#menu_tree").hide()
+                $("#noSys").show()
+                addSys(); //添加系统信息
+            }
+        })
+    }
+
+    function playMusic() {
+        const audioEle = document.getElementById("audio");
+        audioEle.src='/video/system/next.mp3';
+        audioEle.load();
+        // if (audioEle.paused){ /*如果已经暂停*/
+            audioEle.play();   //播放
+        // }else {
+        //     audioEle.pause();  //暂停
+        // }
+    }
+    
+    function audioBg() {
+        const audioEle = document.getElementById("audioBg");
+        audioEle.src='/video/system/next.mp3';
+        audioEle.load();
+        // if (audioEle.paused){ /*如果已经暂停*/
+        audioEle.play();   //播放
+        // }else {
+        //     audioEle.pause();  //暂停
+        // }
+    }
+</script>
+</body>
+
+</html>

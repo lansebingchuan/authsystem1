@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的产品列表</title>
+    <link href="/js/layui/css/layui.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="layui-body" style="left: 10px">
+    <div style="padding: 15px;">
+        <div class="layui-row" id="content">
+        </div>
+    </div>
+</div>
+
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/layui/layui.all.js"></script>
+<script src="/js/layui/lay/lib/laytpl.js"></script>
+
+<script src="/js/vue/vue.min.js"></script>
+
+<script>
+
+    $(function () {
+
+        var data = {
+            listProduct: null,
+            myListProduct: function () {
+                var that = this;
+                $.post("/product/myListProduct",function (data) {
+                    if (data.flage){
+                        that.listProduct = data.productList;
+                        //渲染页面
+                        that.view();
+                    }else {
+                        window.layer.msg("数据查询失败！")
+                    }
+                })
+            },
+            view: function () {
+                var listProduct = this.listProduct;
+                var $content = $('#content')
+                $.each(listProduct, function (index , product) {
+                    var col = '<div class="layui-col-lg3 layui-col-md4 layui-col-sm6 layui-col-xs6" style="padding: 10px">\n' +
+                        '        <div class="layui-row">\n' +
+                        '            <div style="width: 100%; height: 250px">\n' +
+                        '                <img width="100%" height="100%" src="'+
+                        product.icon+'" alt="图片">\n' +
+                        '            </div>\n' +
+                        '        </div>\n' +
+                        '        <div class="layui-row">\n' +
+                        '            <span style="font-size: 24px;color: red">￥'+
+                        product.price+'</span>\n' +
+                        '        </div>\n' +
+                        '        <div class="layui-row">\n' +
+                        '            <div style="font-size: 12px;font-weight: 500; margin-left: 20px;margin-top: 10px">'+
+                        product.depict+'</div>\n' +
+                        '        </div>\n' +
+                        '        <div class="layui-row">\n' +
+                        '            <div style="float: right;margin-right: 20px">\n' +
+                        '                <span style="font-size: 12px;font-weight: 500;color: #9c9c9c; margin-left: 20px;">月销：'+
+                        product.buyCount+'</span>\n' +
+                        '            </div>\n' +
+                        '        </div>\n' +
+                        '    </div>';
+                    $content.append(col);
+                })
+                window.parent.authIframeWidth();
+            }
+        }
+
+        //获取我的商品信息
+        data.myListProduct();
+
+    })
+
+</script>
+
+<script>
+    window.parent.authIframeWidth();
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>增加角色信息</title>
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+
+</head>
+<body onload="showDate()">
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+<div class="container-fluid" id="tree">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 65px;">
+            <div class="tree">
+                <ul id="menu_tree">
+                    <!--左侧权限控制导航栏-->
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-10" style="margin-top: 55px;">
+            <div class="col-sm-12 col-md-12 main">
+                <ol class="breadcrumb">
+                    <li><a href="#">数据列表</a></li>
+                    <li class="active">新增</li>
+                </ol>
+                <div class="panel panel-info">
+                    <div class="panel-heading">角色分配权限</div>
+                    <div class="panel-body">
+                        <table class="table table-striped table-hover" id="table" style="">
+                            <thead id="thead">
+
+                            </thead>
+                            <tbody id="tbody" style="text-align: center;">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/leftMenu.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script>
+    //控制点击的什么栏显示
+    var pathname = window.location.pathname;
+    $(menuTree).find("dl a[href=\'" + pathname + "\']").parent().attr("class", "layui-nav-item layui-this");
+</script>
+
+
+<script src="/js/zTree/jquery.ztree.all-3.5.min.js"></script><!-- ztree： -->
+<script src="/js/zTree/jquery.ztree.core.js"></script>
+<script src="/js/zTree/jquery.ztree.excheck.js"></script>
+<script src="/js/zTree/jquery.ztree.exedit.js"></script>
+
+<script>
+
+    var roles = [{ name: '程序员', id: 1 }, { name: '财务', id: 2 }, { name: '行政', id: 3 }]
+    var permissions = [{ name: '文件系统', id: 1 }, { name: '加密系统', id: 2 }, { name: '普通文件', id: 3 }]
+    var role_per = [{ id: 1, roleId: 1, perId: 2 }, { id: 2, roleId: 1, perId: 3 }, { id: 3, roleId: 2, perId: 2 }]
+    $.ajaxSettings.async = false;//设置为同步
+    $.post("/listAllRoleAndPerAndRp", {}, function (data) {
+        roles = data.roleList;
+        permissions = data.permissionList;
+        role_per = data.rolePerList;
+    }).error(function () {
+        layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+        });
+    })
+    $.ajaxSettings.async = true;//设置为同步
+    var tbody = $("#tbody");
+    var thead = $("#thead");
+    var tr = $('<tr></tr>')
+    tr.append($('<th  style="text-align: center;background-image:url(\'img\/fenge(2).png\'); background-repeat:no-repeat;background-position:40px -5px"></th>'))
+    //遍历角色
+    $.each(roles, function (index, role) {
+        var th = $('<th style="text-align: center;"></th>');
+        $(th).text(role.name);
+        $(th).attr("roleId", role.id)
+        $(tr).append(th);
+    })
+    $(thead).append(tr);
+    var roleLength = roles.length;
+    //遍历权限路径
+    $.each(permissions, function (index, permission) {
+        var tr = $('<tr></tr>')
+        var th = $('<th scope="row" style="text-align: center;"></th>');
+        $(th).text(permission.name);
+        $(tr).append(th);
+        for (var i = 0; i < roleLength; i++) {
+            var role = roles[i];
+            var td = $('<td ></td>');
+            var checkbox = $('<input type="checkbox" id="modifyRolePermission">');
+            checkbox.attr("roleId", role.id);
+            checkbox.attr("perId", permission.id);
+            $(td).append(checkbox);
+            $(tr).append(td);
+        }
+        $(tbody).append(tr);
+    })
+
+    //点击添加或删除角色权限
+    $("body").on("click", "#modifyRolePermission", function () {
+        var checkbox = $(this);
+        var checkedFlage = checkbox[0].checked//为空表示取消
+        var roleId = checkbox.attr("roleId");
+        var perId = checkbox.attr("perId");
+        if (checkedFlage) {
+            console.log("添加角色权限：" + "角色：" + roleId + "权限：" + perId)
+            $.post("/addRolePermissionSingle", {roleId: roleId, perId: perId}, function (data) {
+                if (data.flage){
+                    layer.msg("增加权限成功！", { time: 1500, icon: 6, shift: 6 }, function () {
+                    });
+                }else {
+                    layer.msg("增加权限失败！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                }
+            })
+        } else {
+            console.log("删除角色权限：" + "角色：" + roleId + "权限：" + perId)
+            $.post("/delRolePermissionSingle", {roleId: roleId, perId: perId}, function (data) {
+                if (data.flage){
+                    layer.msg("修改权限成功！", { time: 1500, icon: 6, shift: 6 }, function () {
+                    });
+                }else {
+                    layer.msg("修改权限失败！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                }
+            })
+        }
+
+    })
+    //已设置的角色权限
+    $.each(role_per, function (index, rp) {
+        var roleId = rp.roleId;
+        var perId = rp.perId;
+        var checked = $(tbody).find("input[roleId=" + roleId + "][perId=" + perId + "]")
+        checked.attr("checked", "checked");
+        checked.attr("rpId", rp.id);
+    })
+
+    var addFrom = new Vue({
+        el: "#addFrom",
+        data: {
+            serverData: {flage: true},
+        },
+        methods:{
+
+        }
+    });
+
+    function submitForm() {
+        return addFrom.serverData;//上传系统之后，服务器返回的数据
+    }
+
+</script>
+</body>
+</html>

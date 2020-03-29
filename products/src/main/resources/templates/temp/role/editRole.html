@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="#">首页</a></li>
+                <li><a href="#">数据列表</a></li>
+                <li class="active">更新</li>
+            </ol>
+            <div class="panel panel-default">
+                <div class="panel-heading">表单数据<div style="float:right;cursor:pointer;" data-toggle="modal" data-target="#myModal"><i class="glyphicon glyphicon-question-sign"></i></div></div>
+                <div class="panel-body">
+                    <form role="form" id="editForm">
+                        <div class="form-group">
+                            <label for="roleName">名称</label>
+                            <input name="roleName" type="text" v-model="roleName" class="form-control" id="roleName"
+                                   placeholder="请输入有效的名称">
+                            <p v-show="roleNameFlage" class="help-block label label-warning">请输入有效的名称！
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script type="text/javascript">
+    var editForm = new Vue({
+        el: "#editForm",
+        data: {
+            roleName: '',
+            roleId: '',
+            roleNameFlage: false
+        },
+        method:{
+
+        }
+    });
+    
+    function setData(data) {//父页面传过来的值--对象
+        editForm.roleName = data.roleName;
+        editForm.roleId = data.roleId;
+    }
+    
+    function submitForm() {//弹出提交表单
+        $.ajaxSettings.async = false;//设置为同步
+        var data;
+        $.post("/updateRoleSingle", {id: editForm.roleId, name: editForm.roleName}, function (resultData) {
+            data = resultData;
+        })
+        $.ajaxSettings.async = true;//设置为同步
+        return data;
+    }
+</script>
+</body>
+</html>

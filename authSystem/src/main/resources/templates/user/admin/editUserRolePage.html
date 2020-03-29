@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>增加角色信息</title>
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-3">
+
+        </div>
+        <div class="col-sm-6 col-md-6">
+            <ol class="breadcrumb">
+                <li><a href="#">首页</a></li>
+                <li><a href="#">数据列表</a></li>
+                <li class="active">新增/修改</li>
+            </ol>
+            <div class="panel panel-default">
+                <div class="panel-heading">表单数据<div style="float:right;cursor:pointer;" data-toggle="modal" data-target="#myModal"><i class="glyphicon glyphicon-question-sign"></i></div></div>
+                <div class="panel-body">
+                    <form role="form" id="addform">
+                        <div class="row">
+                            <div class="col-sm-1 col-xs-0">
+                            </div>
+                            <div class="col-sm-4 col-xs-5">
+                                <label for="roleMe">已添加角色名称：</label>
+                                <br>
+                                <select id="roleMe" name="roleMe" style="width:250px; height:220px;" multiple="multiple">
+
+                                </select>
+                                <br>
+                                <!--<label style="color: red;"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;双击移除</label>-->
+                            </div>
+                            <div class="col-sm-1 col-xs-2">
+                                    <div style="margin-top: 50px;">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <a href="#" onclick="selectRite()">
+                                                    <i class="glyphicon glyphicon-chevron-right" ></i>
+                                                </a>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <a href="#" onclick="selectleft()">
+                                                    <i class="glyphicon glyphicon-chevron-left"></i>
+                                                </a>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <a href="#" onclick="selectAllRite()">
+                                                    <i class="glyphicon glyphicon-forward"></i>
+                                                </a>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <a href="#" onclick="selectAllleft()">
+                                                    <i class="glyphicon glyphicon-backward"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                            </div>
+                            <div class="col-sm-5 col-xs-5">
+                                <label for="roleAll">全部角色名称：</label>
+                                <br>
+                                <select id="roleAll" name="roleAll" style="width:250px; height:220px;" multiple="multiple">
+                                </select>
+                                <br>
+                                <!--<label style="color: red;"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;双击移除</label>-->
+                            </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-xs-1"></div>
+                           <div class="col-xs-4">
+                               <button id="useradd" type="button" onclick="updateUserRole()" class="btn btn-success"><i
+                                       class="glyphicon glyphicon-ok"></i> 更新</button>
+                               <button id="resetButton" type="button" class="btn btn-warning"><i
+                                       class="glyphicon glyphicon-repeat"></i> 取消</button>
+                           </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+
+<script>
+    $("#resetButton").click(function() {
+        window.history.back(); //返回上一页
+    });
+    var userId = getUrlId('userId');
+    var roleMeT = $("#roleMe");
+    var roleAllT = $("#roleAll");
+    $(function () {
+        $.post("/listUserRole" , {id: userId} , function (data) {
+            if (data.flage){
+                debugger
+                var listRole = data.listUserRole;
+                var roleAll = listRole.roleAll;
+                var listUserRole = listRole.listUserRole;
+                $.each(roleAll , function (index , role) {
+                    var op = $('<option ondblclick="dbToLeft(this)" value="'+role.id+'">'+role.name+'</option>');
+                    roleAllT.append(op)
+                })
+                $.each(listUserRole , function (index , role) {
+                    var op = $('<option ondblclick="dbToRight(this)" value="'+role.id+'">'+role.name+'</option>');
+                    roleMeT.append(op)
+                })
+            }
+        })
+    })
+
+    function submitForm() {
+        addFrom.toAddSysRole();
+        return addFrom.serverData;//上传系统之后，服务器返回的数据
+    }
+/*    //双击移除到右边
+    function dbToRight(param) {
+        var option = $(param);
+        var opc = $(option).clone();
+        $(opc).attr("ondblclick", "dbToLeft(this)")
+        roleAllT.append(opc);
+        option.remove();
+    }
+    //双击移除到左边
+    function dbToLeft(param) {
+        var option = $(param);
+        var opc = $(option).clone();
+        $(opc).attr("ondblclick", "dbToRight(this)")
+        roleMeT.append(opc);
+        option.remove();
+    }*/
+
+    //选择一个到右边
+    function selectRite() {
+        var optioneds = $("#roleMe option:selected");
+        debugger
+        if (optioneds.length != 0){
+           var option =  optioneds.clone();
+            roleAllT.append($(option));
+            optioneds.remove();
+        }else {
+            layer.msg("请选择角色！", { time: 1500, icon: 5, shift: 6 }, function () {
+            });
+        }
+    }
+    //选择所有的到右边
+    function selectAllRite() {
+        var optioneds = $("#roleMe option");
+        debugger
+        if (optioneds.length != 0){
+           var option =  optioneds.clone();
+            roleAllT.append($(option));
+            optioneds.remove();
+        }else {
+            layer.msg("请选择角色！", { time: 1500, icon: 5, shift: 6 }, function () {
+            });
+        }
+    }
+    //选择一个或多个到左边
+    function selectleft() {
+        var optioneds = $("#roleAll option:selected");
+        debugger
+        if (optioneds.length != 0){
+           var option =  optioneds.clone();
+            roleMeT.append($(option));
+            optioneds.remove();
+        }else {
+            layer.msg("请选择角色！", { time: 1500, icon: 5, shift: 6 }, function () {
+            });
+        }
+    }
+    //选择所有到左边
+    function selectAllleft() {
+        var optioneds = $("#roleAll option");
+        debugger
+        if (optioneds.length != 0){
+           var option =  optioneds.clone();
+            roleMeT.append($(option));
+            optioneds.remove();
+        }else {
+            layer.msg("请选择角色！", { time: 1500, icon: 5, shift: 6 }, function () {
+            });
+        }
+    }
+    //选择所有到左边
+    function updateUserRole() {
+        var optioneds = $("#roleMe option");
+        var roleIds = [];
+        $.each(optioneds , function (index , role) {
+            var roleId = parseInt($(role).val());
+            roleIds.push(roleId);
+        })
+        //jQuery.ajaxSettings.traditional = true; 如果使用$.post()方式提交，需要设置序列化方式，防止深度序列化
+        $.ajax({
+            url:"/updateUserRole",
+            data:{
+                "id":userId,
+                "roleIds":roleIds,
+            },
+            dataType:"json",
+            type:"post",
+            traditional:true,//防止深度序列化
+            cache:false,
+            async:false,
+            success:function(data){
+                if (data.flage){
+                    layer.msg("用户角色修改成功！", { time: 1000, icon: 6, shift: 6 });
+                    setInterval( function () {
+                        window.history.back(); //返回上一页
+                    }, 1000);
+                }else {
+                    layer.msg("用户角色修改失败！", { time: 1000, icon: 5, shift: 6 });
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <div class="tree" id="tree">
+                <script type="text/javascript" src="/script/left.js"></script><!-- //加载left页面 -->
+            </div>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <ol class="breadcrumb">
+                <li><a href="#">首页</a></li>
+                <li><a href="#">数据列表</a></li>
+                <li class="active">新增</li>
+            </ol>
+            <div class="panel panel-default">
+                <div class="panel-heading">表单数据<div style="float:right;cursor:pointer;" data-toggle="modal" data-target="#myModal"><i class="glyphicon glyphicon-question-sign"></i></div></div>
+                <div class="panel-body">
+                    <form role="form" id="addform">
+                        <div class="form-group">
+                            <label for="loginName">用户名</label>
+                            <input name="loginName" type="text" v-model="loginName" class="form-control"
+                                   id="loginName" placeholder="请输入用户名">
+                            <p v-show="loginNameFlage" class="help-block label label-warning">{{loginNameMessage}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="userName">姓名</label>
+                            <input name="userName" type="text" v-model="userName" class="form-control" id="userName"
+                                   placeholder="请输入真实姓名">
+                            <p v-show="userNameFlage" class="help-block label label-warning">姓名为2-5个汉字！
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="">职务</label>
+                            <div class="form-group has-primary has-feedback">
+                                <select class="form-control" name="role" id="role">
+                                    <option value="averageUser" selected>普通</option>
+                                    <option value="admin">管理</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input name="password" type="password" v-model="password" class="form-control" id="password"
+                                   placeholder="请输入密码">
+                            <p v-show="passwordFlage" class="help-block label label-warning">密码的长度为6-10，不能使用非法字符！</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="password1">确认密码</label>
+                            <input name="password1" type="password" v-model="password1" class="form-control" id="password1"
+                                   placeholder="再一次输入密码">
+                            <p v-show="password1Flage" class="help-block label label-warning">两次密码不一致！</p>
+                        </div>
+                        <button id="useradd" type="button" @click="toAddUser()" class="btn btn-success"><i
+                                class="glyphicon glyphicon-plus"></i> 新增</button>
+                        <button id="resetButton" type="button" class="btn btn-danger"><i
+                                class="glyphicon glyphicon-refresh"></i> 重置</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script type="text/javascript">
+    $("#resetButton").click(function() {
+        $("#addform")[0].reset();//重置按钮的点击事件，点击了那么清空表单
+    });
+    var addform = new Vue({//表单控件部分
+        el: "#addform",
+        data: {
+            loginName: "",//登录名
+            loginNameFlage: false,//
+            loginNameMessage: "用户名必须是数字或者字母，4-7个字符！",//用户名提示信息
+            userName: "",//真实姓名
+            userNameFlage: false,
+            tel: "",//电话号码
+            telFlage: false,
+            job: "",//职务
+            jobFlage: false,
+            password: "",//密码
+            passwordFlage: false,
+            password1: "",//确认密码
+            password1Flage: false,
+            count : 1,
+        },
+        methods: {
+            toAddUser: function () {//增加人员
+                if (this.loginName != "" && this.userName != "" && this.password!= "" && this.password1!=""
+                    && !this.loginNameFlage && !this.userNameFlage && !this.passwordFlage && !this.password1Flage) {
+                    var index = layer.load(0, {shade: [0.6, '#fff']});//页面加载效果
+                    $.post("/addUser", $("#addform").serialize(), function (data) {
+                        layer.close(index);//关闭加载效果
+                        if (data.flage) {
+                            layer.msg("新增人员成功！", { time: 1500, icon: 6, shift: 6 }, function () {
+                            });
+                            sleep(1500);
+                            window.location.href = "/main";
+                        } else {
+                            layer.msg("新增人员失败！", { time: 1500, icon: 5, shift: 6 }, function () {
+                            });
+                        }
+                    }).error(function () {
+                        layer.msg("新增人员失败！", { time: 1500, icon: 5, shift: 6 }, function () {
+                        });
+                        layer.close(index);//关闭加载效果
+                    });//判断用户名
+                } else {
+                    layer.msg("信息未完成填写！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                }
+            }
+        },//监听器判断值输入合法性
+        watch: {//表示监听器，监听某个值是否改变了，那么就做事情
+            loginName: function (newvalue, oldvalue) {
+                if ("" != newvalue) {
+                    var regex = /^[0-9a-zA-Z_]+$/gi;
+                    var result = regex.test(newvalue);
+                    if (!result || newvalue.length < 4 || newvalue.length > 7) {
+                        this.loginNameFlage = true;
+                        this.loginNameMessage = "用户名必须是数字或者字母，4-7个字符！"
+                    } else {
+                        $.get("/judgeLoginName", { loginName: newvalue }, function (data) {
+                            if (data.flage) {
+                                addform.loginNameFlage = false;
+                            } else {
+                                addform.loginNameFlage = true;
+                                addform.loginNameMessage = "此用户名已经注册了！";
+                            }
+                        });//判断用户名
+                    }
+                }
+            },
+            tel: function (newvalue, oldvalue) {
+                if (!(/^1[3456789]\d{9}$/.test(newvalue))) {
+                    this.telFlage = true;
+                } else {
+                    this.telFlage = false;
+                }
+            },
+            userName: function (newvalue, oldvalue) {
+                if ("" != newvalue) {
+                    var regex = /^[\u4e00-\u9fa5]{2,}$/;
+                    var result = regex.test(newvalue);
+                    if (!result || newvalue.length < 2) {
+                        this.userNameFlage = true;
+                    } else if (newvalue.length > 5) {
+                        this.userNameFlage = true;
+                    } else {
+                        this.userNameFlage = false;
+                    }
+                }
+            },
+            password: function (newvalue, oldvalue) {
+                if ("" != newvalue) {
+                    if (6 <= newvalue.length && newvalue.length <= 10) {
+                        var regex = /^[a-zA-Z0-9!@#$%^&*()-_+=\[\]{}<>\/,.?]+$/gi;
+                        var result = regex.test(newvalue);
+                        if (!result) {
+                            this.passwordFlage = true;
+                        } else {
+                            this.passwordFlage = false;
+                        }
+                    } else {
+                        this.passwordFlage = true;
+                    }
+                }
+            },
+            password1: function (newvalue, oldvalue) {
+                if (newvalue != this.password) {
+                    this.password1Flage = true;
+                } else {
+                    this.password1Flage = false;
+                }
+            }
+        }
+    });
+
+    //睡眠
+    function sleep(delay) {
+        var start = (new Date()).getTime();
+        while ((new Date()).getTime() - start < delay) {
+            continue;
+        }
+    }
+</script>
+</body>
+</html>

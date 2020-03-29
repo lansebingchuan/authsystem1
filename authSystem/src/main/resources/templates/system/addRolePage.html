@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>增加角色信息</title>
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 main">
+            <ol class="breadcrumb">
+                <li><a href="#">数据列表</a></li>
+                <li class="active">新增</li>
+            </ol>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>增加系统角色</h4>
+                    <div style="float:right;cursor:pointer;margin-top: -30px;" data-toggle="modal"
+                         data-target="#myModal"><i class="glyphicon glyphicon-question-sign"></i></div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <form role="form" id="addFrom" action="/addSysRole">
+                                <div class="form-group">
+                                    <label style="color: red">*</label>
+                                    <label for="roleName">已添加角色名称：</label>
+                                    <br>
+                                    <select id="roleSlt" name="roleNames" style="width:250px; height:220px;" multiple="multiple">
+                                    </select>
+                                    <br>
+                                    <label style="color: red;"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;双击移除</label>
+                                </div>
+                            <!--    <div class="col-xs-12">
+                                    <button id="useradd" type="button" @click="toAddSysRole()" class="btn btn-success"><i
+                                            class="glyphicon glyphicon-plus"></i> 新增</button>
+                                    <button id="resetButton" type="button" class="btn btn-danger"><i
+                                            class="glyphicon glyphicon-refresh"></i> 重置</button>
+                                </div>-->
+                            </form>
+                        </div>
+                        <div class="col-xs-6">
+                            <form role="form" id="editForm">
+                                <div class="form-group">
+                                    <label style="color: red">*</label>
+                                    <label for="roleName">角色名称：</label>
+                                    <input name="roleName" type="ar" v-model="roleName" class="form-control"
+                                           id="roleName" placeholder="请输入角色名称">
+                                </div>
+                                <button id="roleNameAdd" type="button" @click="addRole()" class="btn btn-primary"><i
+                                        class="glyphicon glyphicon-arrow-left"></i> 设为预选</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/common.js"></script>
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+
+<script>
+    var addFrom = new Vue({
+        el: "#addFrom",
+        data: {
+            serverData: '',
+        },
+        methods:{
+            toAddSysRole: function () {//增加系统角色
+                selected("roleSlt") //下拉框中的option全部选中
+                var roleSltLength = $("#roleSlt option").length;
+                if (roleSltLength > 0 ) {
+                    $.ajaxSettings.async = false;//设置为同步
+                    $.post("/addSelectSysRole", $("#addFrom").serialize(), function (data) {
+                        addFrom.serverData = data;
+                    }).error(function () {
+                        layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+                        });
+                    });//判断用户名
+                    $.ajaxSettings.async = true;//设置为同步
+                }else {
+                    layer.msg("请添加角色之后提交！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                }
+
+            }
+        }
+    });
+    var editForm = new Vue({
+        el: "#editForm",
+        data: {
+            roleName: '',
+        },
+        methods:{
+            addRole: function () {
+                if (this.roleName && this.roleName != ''){
+                    var op = '<option value="'+this.roleName+'">'+this.roleName+'</option>';
+                    $("#roleSlt").append(op);
+                    $("option").dblclick(function(){//双击移除
+                        $(this).remove();
+                    });
+                }else {
+                    layer.msg("请输入角色名称！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                }
+            }
+        }
+    });
+
+    function submitForm() {
+        addFrom.toAddSysRole();
+        return addFrom.serverData;//上传系统之后，服务器返回的数据
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>人员管理</title>
+    <link rel="stylesheet" href="../static/css/bootstrap/css/bootstrap.min.css">
+    <!--弹层组件-->
+    <link href="../static/datecj/css/range-picker.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/css/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/layui/css/layui.all.css" rel="stylesheet">
+    <link href="/js/layui/css/modules/code.css" rel="stylesheet" >
+    <link href="/js/layui/css/modules/laydate/laydate.css" rel="stylesheet">
+    <link href="/js/jquery/pagination/pagination.css" rel="stylesheet">
+
+    <link href="/js/zTree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+</head>
+<style>
+    html,
+    body {
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body onload="showDate()">
+<nav id="fixed-top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid" id="top">
+        <div class="navbar-header">
+            <div><a class="navbar-brand" style="font-size:32px;" href="#">统一认证管理系统</a></div>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse"
+             style="color: cornsilk; float: right; width: 700px;margin-top: 25px;">
+
+            <div style="float: right;">
+                <div style="margin-top: -16px;">
+                    <button id="" type="button" class="btn btn-primary" style="float:right;padding-bottom: 5px"
+                            onClick="exit()"><i class="glyphicon glyphicon-off"></i> 退出系统
+                    </button>
+                </div>
+            </div>
+            <div style="float: right;margin-right: 25px;margin-top: -10px">欢迎您：<span>{{userName}}</span>&nbsp;&nbsp;&nbsp;当前时间：<span
+                    id="yearText"></span></div>
+        </div>
+    </div>
+    </div>
+</nav>
+<div class="container-fluid" id="tree">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 65px;">
+            <div class="tree">
+                <ul id="menu_tree">
+                    <!--左侧权限控制导航栏-->
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-10" style="margin-top: 55px;">
+            <div class="col-sm-12 col-md-12 main">
+                <ol class="breadcrumb">
+                    <li><a href="#">数据列表</a></li>
+                    <li class="active">新增</li>
+                </ol>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>系统权限路径管理</h4>
+                        <div style="float:right;cursor:pointer;margin-top: -15px;" data-toggle="modal"
+                             data-target="#myModal"><i class="glyphicon glyphicon-question-sign"></i></div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <form role="form" id="addFrom">
+                                    <div class="zTreeDemoBackground left" style="background-color: #f1f1f1;width: 100%;height: 300px;border: 1px solid #797878;">
+                                        <label for="perName">权限树：</label>
+                                        <ul id="treeDemo" class="ztree"></ul>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-xs-8">
+                                <form role="form" id="editForm">
+                                    <div class="form-group">
+                                        <label style="color: red">*</label>
+                                        <label for="perName">权限名称：</label>
+                                        <input name="perName" type="ar" v-model="perName" class="form-control"
+                                               id="perName" placeholder="请输入权限名称">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="color: red">*</label>
+                                        <label for="perUrl">权限URL：</label>
+                                        <input name="perUrl" type="ar" v-model="perUrl" class="form-control"
+                                               id="perUrl" placeholder="请输入权限路径URL">
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="color: red;"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;添加“授权路径”时请优先选择一个目录</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-6" id="editDiv">
+                                                <button id="addParent" type="button"  class="btn btn-success" style="margin-left: 10px"><i
+                                                        class="glyphicon glyphicon-list-alt"></i> 增加为目录</button>
+                                                <button id="addLeaf" type="button" class="btn btn-info" style="margin-left: 10px"><i
+                                                        class="glyphicon glyphicon-tag"></i> 增加授权路径</button>
+                                                <button id="remove" type="button" class="btn btn-danger" style="margin-left: 10px"><i
+                                                        class="glyphicon glyphicon-remove"></i> 删除节点</button>
+                                            </div>
+                                            <div class="col-xs-4 col-md-4" id="updateDiv" style="display: none">
+                                                <button id="update" type="button"  class="btn btn-success" style="margin-left: 10px"><i
+                                                        class="glyphicon glyphicon-refresh"></i>更新节点</button>
+                                                <button id="cancel" type="button" class="btn btn-warning" style="margin-left: 10px"><i
+                                                        class="glyphicon glyphicon-repeat"></i> 取消选择</button>
+                                            </div>
+                                            <div class="col-xs-2 col-md-2">
+                                                <button id="control" type="button" class="btn btn-warning">我要更新</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+<script src="js/jquery/jquery-form.min.js"></script>
+<script src="/js/jquery/pagination/jquery.pagination.js"></script><!--分页-->
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/css/bootstrap/js/bootstrap.min.js"></script><!--bootstrap js-->
+
+<script src="/js/vue/vue.min.js"></script> <!-- vue根需求： -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script><!-- ajax请求： -->
+<script src="/js/common.js"></script>
+<script src="/js/mian.js"></script>
+<script src="/js/leftMenu.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script>
+    //控制点击的什么栏显示
+    var pathname = window.location.pathname;
+    $(menuTree).find("dl a[href=\'" + pathname + "\']").parent().attr("class", "layui-nav-item layui-this");
+</script>
+
+<script src="/js/zTree/jquery.ztree.all-3.5.min.js"></script><!-- ztree： -->
+<script src="/js/zTree/jquery.ztree.core.js"></script>
+<script src="/js/zTree/jquery.ztree.excheck.js"></script>
+<script src="/js/zTree/jquery.ztree.exedit.js"></script>
+<script>
+
+    var setting = {
+        view: {
+            selectedMulti: false
+        },
+        edit: {
+            enable: true,
+            showRemoveBtn: false,
+            showRenameBtn: false
+        },
+        data: {
+            keep: {
+                parent:true,
+                leaf:true
+            },
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            beforeDrag: beforeDrag,
+            onClick: zTreeOnClick
+        }
+    };
+    function beforeDrag(treeId, treeNodes) {
+        return false;
+    }
+
+    var permissionIndex = 1;
+    var zNodes;
+    var treeObj;
+    var permission ={};//增加的授权路径信息
+    function add(e) {
+        if (editForm.perName == '' || editForm.perUrl == ''){
+            layer.msg("请输入完整信息！", { time: 2000, icon: 5, shift: 6 }, function () {
+            });
+            return
+        }
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+            isParent = e.data.isParent,
+            nodes = zTree.getSelectedNodes(),
+            treeNode = nodes[0];
+        if (treeNode) {
+            if (isParent){
+                layer.msg("权限被锁定，无法增加权限！", { time: 2000, icon: 5, shift: 6 }, function () {
+                });
+                return
+            }
+            permission.id = permissionIndex;
+            permission.pId = treeNode.id;
+            permission.isParent = isParent;
+            permission.name = editForm.perName;
+            permission.url = editForm.perUrl;
+            permissionIndex++;
+            treeNode = zTree.addNodes(treeNode, permission );
+        } else {
+            if (!isParent){
+                layer.msg("请选择一个目录添加！", { time: 2000, icon: 5, shift: 6 }, function () {
+                });
+                return
+            } else {
+                permission.id = permissionIndex;
+                permission.pId = 0;
+                permission.isParent = isParent;
+                permission.name = editForm.perName;
+                permission.url = editForm.perUrl;
+                permissionIndex++;
+                treeNode = zTree.addNodes(null, permission );
+            }
+        }
+        addFrom.addSingleSysPermission();
+        if (treeNode) {
+            //zTree.editName(treeNode[0]);
+        } else {
+            layer.msg("权限被锁定，无法增加权限！", { time: 2000, icon: 5, shift: 6 }, function () {
+            });
+        }
+    };
+    function remove(e) {
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+            nodes = zTree.getSelectedNodes(),
+            treeNode = nodes[0];
+        if (nodes.length == 0) {
+            layer.msg("请先选择一个需要移除的节点！", { time: 2000, icon: 5, shift: 6 }, function () {
+            });
+            return;
+        }
+        if (treeNode.children && treeNode.children.length > 0){
+            layer.msg("还有子节点不能移除！", { time: 2000, icon: 5, shift: 6 }, function () {
+            });
+            return;
+        }
+        zTree.removeNode(treeNode);
+        addFrom.removeSingleSysPermission(treeNode.id);
+        editForm.perName = "";
+        editForm.perUrl = "";
+    };
+
+    function cancel(){
+        treeObj.checkAllNodes(false);
+        treeObj.cancelSelectedNode();
+        editForm.perName = "";
+        editForm.perUrl = "";
+    }
+
+    function zTreeOnClick(event, treeId, treeNode) {
+        debugger
+        var contor = $("#control").text();
+        if (contor == '我要更新'){//如果不是更新状态，那么返回
+            return;
+        }
+        addFrom.selectPermission(treeNode.id);
+    };
+
+    function update(){
+        addFrom.updatePermission();
+    }
+
+    //开始注册事件
+    $(document).ready(function(){
+        $("#addParent").bind("click", {isParent:true}, add);
+        $("#addLeaf").bind("click", {isParent:false}, add);
+        $("#remove").bind("click", remove);
+        $("#cancel").bind("click", cancel);
+        $("#update").bind("click", update);
+        $("#control").bind("click", control);
+        listAllPermission();//加载系统权限
+    });
+
+    //切换隐藏更新
+    function control(param) {
+        var con = $(param)[0].currentTarget;
+        var text = $(con).text();
+        if (text == '我要更新'){
+            $(con).text('取消更新');
+            $("#editDiv").hide();
+            $("#updateDiv").show();
+        }else {
+            $(con).text('我要更新');
+            editForm.perName = "";
+            editForm.perUrl = "";
+            $("#editDiv").show();
+            $("#updateDiv").hide();
+        }
+    }
+
+    var addFrom = new Vue({
+        el: "#addFrom",
+        data: {
+            serverData: '',
+        },
+        methods:{
+            toAddSysPermission: function () {//增加系统角色
+                addFrom.serverData = {flage: true}
+            },
+            addSingleSysPermission: function () {//增加系统角色
+                $.ajaxSettings.async = false;//设置为同步
+                $.post("/addSingleSysPermission", permission , function (data) {
+                    if (data.flage){
+                        layer.msg("添加成功！", { time: 1500, icon: 6, shift: 6 }, function () {
+                        });
+                        editForm.perName = '';
+                        editForm.perUrl = '';
+                    }
+                }).error(function () {
+                    layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                });//判断用户名
+                $.ajaxSettings.async = true;//设置为同步
+            },
+            removeSingleSysPermission: function (permissionId) {//增加系统角色
+                $.post("/removeSingleSysPermission", {permissionId: permissionId} , function (data) {
+                    if (data.flage){
+                        layer.msg("移除成功！", { time: 1500, icon: 6, shift: 6 }, function () {
+                        });
+                    }
+                }).error(function () {
+                    layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                });//判断用户名
+            },
+            selectPermission : function (permissionId) {
+                $.post("/selectPermissionSingle", {permissionId: permissionId} , function (data) {
+                    if (data.flage){
+                        editForm.perName = data.permission.name;
+                        editForm.perUrl = data.permission.url;
+                        editForm.perId = data.permission.id;
+                    }
+                }).error(function () {
+                    layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                });//判断用户名
+            },
+            updatePermission: function () {
+                if (editForm.perName == '' || editForm.perUrl == ''){
+                    layer.msg("更新内容不能为空！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                    return
+                }
+                $.post("/updatePermissionSingle", {id: editForm.perId, name: editForm.perName, url: editForm.perUrl} , function (data) {
+                    if (data.flage){
+                        listAllPermission();
+                        layer.msg("更新成功！", { time: 1500, icon: 6, shift: 6 }, function () {
+                        });
+                    }else {
+                        layer.msg("更新失败！", { time: 1500, icon: 5, shift: 6 }, function () {
+                        });
+                    }
+                }).error(function () {
+                    layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+                    });
+                });//判断用户名
+            }
+        }
+    });
+    var editForm = new Vue({
+        el: "#editForm",
+        data: {
+            perName: '',
+            perUrl: '',
+            perId: ''
+        },
+        methods:{
+
+        }
+    });
+
+    //获取所有的系统权限信息，加载树信息
+    function listAllPermission() {
+        $.get("/listAllPermission", {} , function (data) {
+            zNodes = new Array();
+            //销毁所有的zTree
+            $.fn.zTree.destroy();
+            if (data.flage){
+                $.each(data.listAllPermission, function (index , permission) {
+                    var node = getNode(permission);
+                    zNodes.push(node);
+                });
+                permissionIndex = zNodes[zNodes.length-1].id+1
+            }
+            treeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+        }).error(function () {
+            layer.msg("系统错误！", { time: 1500, icon: 5, shift: 6 }, function () {
+            });
+        });//判断用户名
+    }
+
+    function getNode(permission) {
+        var node = {};
+        node.id = permission.id;
+        node.pId = permission.pId;
+        node.name = permission.name;
+        if (permission.pId == 0){
+            node.isParent = true;
+        }else {
+            node.isParent = false;
+        }
+        return node;
+    }
+
+</script>
+</body>
+
+</html>

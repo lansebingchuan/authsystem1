@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>发货中</title>
+    <link href="/js/layui/css/layui.css" rel="stylesheet" type="text/css">
+    <style>
+        .money{
+            color: red;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        .layui-btn-group button{
+            margin-left: 40px;
+        }
+        .content{
+            padding-left: 10px;
+            padding-right: 10px;
+            border: 2px solid #f5f8fa;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-row content">
+    <div class="layui-row"  style="display: flex; align-items: center; font-size: 18px; color: #a2b2bd; height: 40px;background-color: #f5f8fa">
+        <div>
+            <img src="" alt="">
+        </div>
+        <div>
+            我的物流
+        </div>
+    </div>
+    <div class="layui-row">
+        <form class="layui-form" action="">
+            <script id="demo" type="text/html">
+                {{# layui.each(d.list, function(index, item){ }}
+                <div class="layui-row">
+                    <div class="layui-col-lg12">
+                        <div class="layui-card">
+                            <div class="layui-card-header" style="background-color: #7c7853; color: white">
+                                <div class="layui-input-inline">
+                                    <!--                            <input lay-filter="select" price="{{item.price}}" value="{{item.shoppingCartId}}" type="checkbox" name="name" lay-skin="primary">-->
+                                </div>
+                                <div class="layui-input-inline">
+                                    <img src="/images/index/md.png" width="20px">
+                                    {{item.name}}
+                                    <i class="layui-icon layui-icon-right"></i>
+                                </div>
+                                <div class="layui-input-inline" style="float: right;margin-right: 10px;font-weight: 600;font-size: 16px">
+                                    <span style="color: #eaffeb">卖家已发货</span>
+                                </div>
+                            </div>
+                            <div class="layui-card-body layui-row">
+                                <div class="layui-col-md2" style="display: flex; align-items: center">
+                                    <div class="layui-row" style="width: 1%">
+                                        <!--                                <input lay-filter="select" value="{{item.shoppingCartId}}" price="{{item.price}}" type="checkbox" shoppingCartId="{{item.shoppingCartId}}" name="name" lay-skin="primary">-->
+                                    </div>
+                                    <div class="layui-row"  style="width: 20%; margin-left: 20px">
+                                        <img src="{{item.icon}}" width="200px" height="200px">
+                                    </div>
+                                </div>
+                                <div class="layui-col-md10"  style="width: 70%; margin-left: -20px">
+                                    <div class="layui-row">
+                                        {{item.depict}}
+                                    </div>
+                                    <div class="layui-row" style="margin-top: 10%">
+                                        <div class="layui-col-md3">
+                                            <span>共{{item.count}}件商品&nbsp;合计：</span>
+                                            <span class="money">￥{{item.totalMoney}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-row">
+                                <div class="layui-col-lg3 layui-col-lg-offset9">
+                                    <div>
+                                        <button type="button" class="layui-btn layui-btn-primary layui-btn-radius">查看物流</button>
+                                        <button type="button" class="layui-btn layui-btn-radius">挑选物流</button>
+                                        <button type="button" onclick="confirmShopping('{{item.shoppingCartId}}','{{item.name}}')" class="layui-btn layui-btn-normal layui-btn-radius">确认收货</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="layui-bg-green">
+                    </div>
+                </div>
+                {{#  }); }}
+            </script>
+            <div id="view"></div>
+            <div class="layui-row" style="text-align: center">
+                <div id="noShopping" style="display: none; color: #8a6d3b"><h1>暂无物流信息！请添加购物车！</h1></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<script src="/js/jquery/jquery-2.1.1.min.js"></script>
+
+<script src="/js/jquery/layer/layer.js"></script><!--弹层组件-->
+<script src="/js/layui/layui.all.js"></script>
+<script src="/js/layui/lay/lib/laytpl.js"></script>
+
+<script src="/js/vue/vue.min.js"></script>
+
+<script>
+    var totalMoney = 0.0;
+
+    var productIds = [];
+
+    Array.prototype.remove = function(val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+
+</script>
+
+<script>
+    //减法
+    function accSub(arg1, arg2) {
+        var r1, r2, m, n;
+        try {
+            r1 = arg1.toString().split(".")[1].length;
+        } catch (e) {
+            r1 = 0;
+        }
+        try {
+            r2 = arg2.toString().split(".")[1].length;
+        } catch (e) {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2)); //last modify by deeka //动态控制精度长度
+        n = (r1 >= r2) ? r1 : r2;
+        return ((arg1 * m - arg2 * m) / m).toFixed(n);
+    }
+
+
+    //加法
+    function accAdd(arg1, arg2) {
+        var r1, r2, m, c;
+        try {
+            r1 = arg1.toString().split(".")[1].length;
+        } catch (e) {
+            r1 = 0;
+        }
+        try {
+            r2 = arg2.toString().split(".")[1].length;
+        } catch (e) {
+            r2 = 0;
+        }
+        c = Math.abs(r1 - r2);
+        m = Math.pow(10, Math.max(r1, r2));
+        if (c > 0) {
+            var cm = Math.pow(10, c);
+            if (r1 > r2) {
+                arg1 = Number(arg1.toString().replace(".", ""));
+                arg2 = Number(arg2.toString().replace(".", "")) * cm;
+            } else {
+                arg1 = Number(arg1.toString().replace(".", "")) * cm;
+                arg2 = Number(arg2.toString().replace(".", ""));
+            }
+        } else {
+            arg1 = Number(arg1.toString().replace(".", ""));
+            arg2 = Number(arg2.toString().replace(".", ""));
+        }
+        return (arg1 + arg2) / m;
+    }
+
+
+    //乘法
+    function accMul(arg1, arg2) {
+        var m = 0,
+            s1 = arg1.toString(),
+            s2 = arg2.toString();
+        try {
+            m += s1.split(".")[1].length;
+        } catch (e) {}
+        try {
+            m += s2.split(".")[1].length;
+        } catch (e) {}
+        return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m);
+    }
+
+
+    //除法
+    function accDiv(arg1, arg2) {
+        var t1 = 0,
+            t2 = 0,
+            r1, r2;
+        try {
+            t1 = arg1.toString().split(".")[1].length;
+        } catch (e) {}
+        try {
+            t2 = arg2.toString().split(".")[1].length;
+        } catch (e) {}
+        with(Math) {
+            r1 = Number(arg1.toString().replace(".", ""));
+            r2 = Number(arg2.toString().replace(".", ""));
+            return (r1 / r2) * pow(10, t2 - t1);
+        }
+    }
+
+
+    //四舍五入
+    function floatRound (num, len = 2){
+        let n = divide(Math.round(times(num, Math.pow(10, len))), Math.pow(10, len))
+        return n.toFixed(len)
+    }
+
+
+</script>
+
+<script>
+    
+    function confirmShopping(shoppingCartId, shoppingName) {
+        console.log(shoppingCartId)
+        window.top.layer.confirm("是否确认_" + shoppingName + "_收货", {icon: 3, title: '提示'}, function (cindex) {
+            $.post("/main/confirmShopping", {status: 3, id: shoppingCartId} , function (date) {
+                if (date.flage){
+                    window.top.layer.msg("确认收货成功！", {icon:6})
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000)
+                }
+            })
+        })
+    }
+
+</script>
+<script>
+
+    layui.use(['form', 'layedit', 'laydate', 'laytpl'], function() {
+        var form = layui.form,
+            layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate,
+            laytpl = layui.laytpl;
+
+        var data = {
+            page: {
+                current: 1,
+                status: 2,
+                total: 0
+            },
+            list: [],
+
+            listPageAlreadyShoppingProduct: function () {
+                $.post("/main/listPageAlreadyShoppingProduct", this.page , function (result) {
+                    data.list = result.records;
+                    data.page.total = result.total;
+                    if (result.total === 0){
+                        $("#noShopping").show();
+                    }else {
+                        $("#noShopping").hide();
+                        data.view();
+                    }
+                });
+            },
+            view: function () {
+                var getTpl = $('#demo')[0].innerHTML
+                    ,view = $('#view');
+                laytpl(getTpl).render(data, function(html){
+                    view[0].innerHTML = html;
+                });
+                form.render(); //更新全部
+                data.event(); //注册事件
+            },
+            event: function () {
+
+                $('#addCount').on('click' , function () {
+                    //数量
+                    var count = parseInt($('#count').text());
+
+                    $('#count').text(++count);
+
+                    var shoppingCartId = $(this).attr('shoppingCartId');
+                    //价格
+                    var price = parseFloat($('input[shoppingCartId="'+shoppingCartId+'"]').attr('price'));
+
+                    var checked = $('input[shoppingCartId="'+shoppingCartId+'"]')[0].checked;
+
+                    if (checked){
+                        totalMoney = accAdd(totalMoney, price);
+                    }
+                    $("#totalMoney").text(totalMoney);
+                });
+
+                $('#delCount').on('click' , function () {
+                    //数量
+                    var count = parseInt($('#count').text());
+
+                    if (count == 1){
+                        return
+                    }
+                    $('#count').text(--count);
+
+                    var shoppingCartId = $(this).attr('shoppingCartId');
+                    //价格
+                    var price = parseFloat($('input[shoppingCartId="'+shoppingCartId+'"]').attr('price'));
+
+                    var checked = $('input[shoppingCartId="'+shoppingCartId+'"]')[0].checked;
+
+                    if (checked){
+                        totalMoney = accSub(totalMoney, price);
+                    }
+                    $("#totalMoney").text(totalMoney);
+                });
+            }
+        }
+
+        data.listPageAlreadyShoppingProduct();
+
+        form.on('checkbox(select)', function(data){
+            var shoppingCartId = data.value;
+            var inputs = $('input[value="'+shoppingCartId+'"]');
+            for(var i = 0; i < inputs.length; i++){
+                inputs[i].checked = data.elem.checked;
+            }
+            form.render(); //更新全部
+            //价格
+            var price = parseFloat($(data.elem).attr('price'));
+
+            var count = parseInt($('#count[shoppingCartId="'+shoppingCartId+'"]').text());
+            debugger
+            var totalPrice = accMul(price , count);
+            if (data.elem.checked){
+                totalMoney = accAdd(totalMoney ,totalPrice)
+                //添加到购物车id
+                productIds.push(shoppingCartId);
+            }else {
+                totalMoney = accSub(totalMoney ,totalPrice)
+                //移除
+                productIds.remove(shoppingCartId);
+            }
+            $("#totalMoney").text(totalMoney);
+
+        });
+
+
+        window.parent.authIframeWidth();
+
+        //进行结算
+        $('#settlement').on('click', function () {
+            if (totalMoney <= 0){
+                window.top.layer.msg("请选择商品信息！")
+                return
+            }
+            window.top.layer.open({
+                type: 1
+                ,title: false //不显示标题栏
+                ,closeBtn: false
+                ,area: '200px;'
+                ,shade: 0.8
+                ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                ,resize: false
+                ,btn: ['确认购买', '残忍拒绝']
+                ,btnAlign: 'c'
+                ,moveType: 1 //拖拽模式，0或者1
+                ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">总金额：<br>'+totalMoney+'</div>'
+                ,success: function(layero){
+                },
+                yes: function (index, layero) {
+                    window.top.layer.close(index);
+                    //启动加载页面效果
+                    var index = window.top.layer.load(0, {shade: [0.6, '#fff']});
+                    jQuery.ajaxSettings.traditional = true;
+                    $.post("/main/toBuyProduct", { productIds: productIds }, function(date) {
+                        if (date.flage){
+                            window.top.layer.msg("购物成功！", {icon: 6})
+                            window.location.reload();
+                        }else {
+                            window.top.layer.msg("订单错误！")
+                        }
+                        window.top.layer.close(index);//关闭加载效果
+                    })
+                    jQuery.ajaxSettings.traditional = false;
+                }
+            });
+        });
+    });
+
+</script>
+
+<script>
+
+
+
+</script>
+
+
+<script>
+
+    var product = new Vue({
+        el: "#product",
+        data:{
+            list: [{name: '香苹果', placeOrigin: '太原', depict: '好吃' , price: '1.11', buyCount:'10'
+                ,icon:'/product/head/31c66f06-71bd-4a72-9f33-b09b47656a25.jpg'}]
+        }
+    });
+
+
+</script>
+</body>
+</html>

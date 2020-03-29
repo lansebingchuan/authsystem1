@@ -1,0 +1,6 @@
+<param name="sysType">
+    <attribute value="grwz">个人网站</attribute>
+    <attribute value="sywz">商业网站</attribute>
+    <attribute value="zfwz">政府网站</attribute>
+    <attribute value="jywz">教育网站</attribute>
+</param>
