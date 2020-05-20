@@ -242,7 +242,7 @@
                 if (data.flage){
                     layer.msg("用户角色修改成功！", { time: 1000, icon: 6, shift: 6 });
                     setInterval( function () {
-                        window.history.back(); //返回上一页
+                        window.location.href='/userManage'; //返回上一页
                     }, 1000);
                 }else {
                     layer.msg("用户角色修改失败！", { time: 1000, icon: 5, shift: 6 });

@@ -120,16 +120,20 @@
         },
         methods: {
             updateUser: function () {
-                $.post("/updateUser" , {userName: this.userName, role: $('#role').val(), id: userId} , function (data) {
-                    if (data.flage){
-                        layer.msg("信息修改成功！", { time: 1000, icon: 6, shift: 6 });
-                        setInterval( function () {
-                            window.history.back(); //返回上一页
-                        }, 1000);
-                    }else {
-                        layer.msg("信息修改失败！", { time: 1000, icon: 5, shift: 6 });
-                    }
-                })
+                if (!this.userNameFlage){
+                    $.post("/updateUser" , {userName: this.userName, role: $('#role').val(), id: userId} , function (data) {
+                        if (data.flage){
+                            layer.msg("信息修改成功！", { time: 1000, icon: 6, shift: 6 });
+                            setInterval( function () {
+                                window.location.href='/userManage'; //返回上一页
+                            }, 1000);
+                        }else {
+                            layer.msg("信息修改失败！", { time: 1000, icon: 5, shift: 6 });
+                        }
+                    })
+                }else{
+                    layer.msg("信息填写错误！", { time: 1000, icon: 5, shift: 6 });
+                }
             }
         },//监听器判断值输入合法性
         watch: {//表示监听器，监听某个值是否改变了，那么就做事情

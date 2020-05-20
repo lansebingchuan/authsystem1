@@ -61,7 +61,7 @@ public class SystemRegServiceImpl implements SystemRegService {
             UserinfoRole userinfoRole = null;
             //设置默认角色
             for (Role role: roleList){
-                userinfoRole = new UserinfoRole(userInfo.getId(), role.getId());
+                userinfoRole = new UserinfoRole(userInfo.getId(), role.getId(), userInfo.getSysUuid());
                 userinfoRoleMapper.insertSelective(userinfoRole);
             }
         }
@@ -78,7 +78,7 @@ public class SystemRegServiceImpl implements SystemRegService {
                 //设置默认角色
                 for (Role role: roleListDefault){
 
-                    userinfoRole = new UserinfoRole(userInfo.getId(), role.getId());
+                    userinfoRole = new UserinfoRole(userInfo.getId(), role.getId(), ConstantInterface.SYSTEMDEFULTUUID);
                     userinfoRoleMapper.insertSelective(userinfoRole);
                 }
             }

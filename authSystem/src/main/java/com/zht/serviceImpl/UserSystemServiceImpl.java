@@ -88,10 +88,18 @@ public class UserSystemServiceImpl implements UserSystemService {
             String[] strings = CommonUtil.formatStringAtToArray(sysRegUuid);
             for (String sysUuid: strings){
                 userSystem = new UserSystem();
-                userSystem.setUserId(userInfo.getId());
-                userSystem.setSysUuid(sysUuid);
-                userSystem.setAudit(0);
-                a = userSystemMapper.insertSelective(userSystem);
+                //不为空表示以前注册过，那么更新最新的信息
+                UserSystem userSystem1 = flagAverageuserReg(sysUuid, userInfo.getId());
+                if (userSystem1 == null){
+                    userSystem.setUserId(userInfo.getId());
+                    userSystem.setSysUuid(sysUuid);
+                    userSystem.setAudit(0);
+                    a = userSystemMapper.insertSelective(userSystem);
+                //重新设置状态为申请中
+                }else {
+                    userSystem1.setAudit(0);
+                    a = updateByPrimaryKeySelective(userSystem1);
+                }
             }
         }
         if (a != 0){

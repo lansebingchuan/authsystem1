@@ -21,6 +21,9 @@ function openCenterWin(title, nextText, url , callback,data){
             yes: function(index, layero){
                 var iframeWin = window.top.window[layero.find('iframe')[0]['name']];
                 var data = iframeWin.submitForm();
+                if (data === 'noMsg'){
+                    return
+                }
                 if(data){
                     window.top.layer.close(index);
                     if (callback) {

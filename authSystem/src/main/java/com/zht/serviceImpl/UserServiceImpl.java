@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
     public Integer updateUserInfo(UserInfo userInfo, UserInfo adminUserInfo) {
         userInfo.setId(adminUserInfo.getId());
         if (userInfo.getImg() != null){
-            userInfo.setImg(ConstantInterface.FILEPATH+adminUserInfo.getSysUuid()+ "/"+userInfo.getImg());
+            userInfo.setImg(ConstantInterface.FILEPATH+userInfo.getSysUuid()+ "/"+userInfo.getImg());
             adminUserInfo.setImg(userInfo.getImg());
         }
         if (userInfo.getUserName() != null){

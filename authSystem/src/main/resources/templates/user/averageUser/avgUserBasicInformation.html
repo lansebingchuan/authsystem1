@@ -179,7 +179,8 @@
             success: function (data) {//上传文件成功之后，得到文件名，和系统的 uuid
                 if (data.flage) {
                     var fileName = data.fileName;
-                    $.post("/averageUser/updateUserInfo", {img: fileName}, function (data) {
+                    var sysUuid = data.sysUuid;
+                    $.post("/averageUser/updateUserInfo", {img: fileName, sysUuid: sysUuid}, function (data) {
                         if (data.flage) {
                             window.top.layer.msg("更新图片成功！", {icon: 6})
                             //更新session-user

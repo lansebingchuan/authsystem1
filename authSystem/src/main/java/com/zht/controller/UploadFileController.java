@@ -1,9 +1,11 @@
 package com.zht.controller;
 
 import com.zht.bean.UserInfo;
+import com.zht.service.UserService;
 import com.zht.util.constant.ConstantInterface;
 import com.zht.util.controller.BaseController;
 import com.zht.util.controller.SessionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,9 @@ import java.util.UUID;
  */
 @RestController
 public class UploadFileController extends BaseController {
+
+    @Autowired
+    UserService userService;
 
     @RequestMapping("/uploadFile")
     public Object uploadFile(MultipartHttpServletRequest multipartHttpServletRequest, HttpSession session) throws IOException {

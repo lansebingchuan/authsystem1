@@ -21,10 +21,10 @@ public interface UserinfoRoleMapper {
     int updateByPrimaryKey(UserinfoRole record);
 
     //根据user id 删除
-    void deleteByUserId(Integer userId);
+    void deleteByUserId(@Param("userId") Integer userId, @Param("sysUuid") String sysUuid);
 
     //增加用户角色
-    Integer addUserRoles(@Param("userId") Integer userId,@Param("listRoleIds") List<Integer> listRoleIds);
+    Integer addUserRoles(@Param("sysUuid") String sysUuid, @Param("userId") Integer userId,@Param("listRoleIds") List<Integer> listRoleIds);
 
     List<UserinfoRole> ListUserRole(Integer userId);
 }

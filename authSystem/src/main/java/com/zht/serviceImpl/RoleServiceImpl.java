@@ -78,13 +78,13 @@ public class RoleServiceImpl implements RoleService {
     public Integer updateUserRole(UserInfo userInfo) {
         Integer[] roleIds = userInfo.getRoleIds();
         List<Integer> listRoleIds = new ArrayList<>();
-        userinfoRoleMapper.deleteByUserId(userInfo.getId());
+        userinfoRoleMapper.deleteByUserId(userInfo.getId(), userInfo.getSysUuid());
         int i = 0;
         if (roleIds != null){
             for (Integer roleId: roleIds){
                 listRoleIds.add(roleId);
             }
-            i = userinfoRoleMapper.addUserRoles(userInfo.getId() , listRoleIds);
+            i = userinfoRoleMapper.addUserRoles(userInfo.getSysUuid() , userInfo.getId() , listRoleIds);
         }
         return i;
     }

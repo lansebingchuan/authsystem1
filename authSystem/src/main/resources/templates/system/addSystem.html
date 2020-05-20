@@ -107,7 +107,7 @@
             sysUrl: "",//url地址
             sysDescribed: "",//系统描述
             sysUrlFlage: false,
-            upFileFlage: false,
+            upFileFlage: true,
             sysDescribedFlage: false,
             sysTypeId:'',
             sysTypeName:'',
@@ -117,6 +117,7 @@
         },
         methods: {
             toAddSys: function () {//增加人员
+                debugger
                 if (this.sysName != "" && this.sysUrl != ""
                     && !this.sysNameFlage && !this.sysUrlFlage && !this.upFileFlage) {
                     $.ajaxSettings.async = false;//设置为同步
@@ -130,8 +131,15 @@
                     });//判断用户名
                     $.ajaxSettings.async = true;//设置为同步
                 } else {
-                    layer.msg("检查信息填写完整！", { time: 1500, icon: 3, shift: 6 }, function () {
-                    });
+                    debugger
+                    if (this.upFileFlage){
+                        layer.msg("请上传系统展示图片！", { time: 1500, icon: 5, shift: 6 }, function () {
+                        });
+                    }else {
+                        layer.msg("检查信息填写完整！", { time: 1500, icon: 3, shift: 6 }, function () {
+                        });
+                    }
+                    addform.serverData = 'noMsg';
                 }
             },
             upFile: function () {

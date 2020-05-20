@@ -69,17 +69,17 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
-  <delete id="deleteByUserId" parameterType="java.lang.Integer" >
+  <delete id="deleteByUserId">
     delete from userinfo_role
-    where userid = #{userid}
+    where userid = #{userId} and sysUuid = #{sysUuid}
   </delete>
 
   <insert id="addUserRoles" >
     <if test="listRoleIds != null">
       <foreach collection="listRoleIds" item="roleId" separator=";">
-        insert into userinfo_role (userid, roleid
+        insert into userinfo_role (userid, roleid,sysUuid
         )
-        values (#{userId}, #{roleId}
+        values (#{userId}, #{roleId},#{sysUuid}
         )
       </foreach>
     </if>
