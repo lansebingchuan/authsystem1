@@ -4,6 +4,7 @@ import com.zht.bean.UserInfo;
 import com.zht.bean.UserSystem;
 import com.zht.dao.UserInfoMapper;
 import com.zht.dao.UserSystemMapper;
+import com.zht.service.SystemRegService;
 import com.zht.service.UserService;
 import com.zht.util.CommonUtil;
 import com.zht.util.MD5Util;
@@ -11,6 +12,7 @@ import com.zht.util.Page;
 import com.zht.util.constant.ConstantInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserSystemMapper userSystemMapper;
 
+    @Autowired
+    SystemRegService systemRegService;
     @Override
     public UserInfo getUserByPassword(String loginName, String password, String role) {
         //转换为md5
@@ -73,13 +77,20 @@ public class UserServiceImpl implements UserService {
         userInfo.setPassword(MD5Util.digest(userInfo.getPassword()));
         int i = userInfoMapper.insertSelective(userInfo);
         UserSystem userSystem = null;
+        //添加当前系统使用信息
         if (sessionUser != null && sessionUser.getSysUuid() != null){
-            userSystem = new UserSystem();
-            userSystem.setUserId(userInfo.getId());
-            userSystem.setSysUuid(sessionUser.getSysUuid());
-            userSystem.setAudit(0);
-            userSystemMapper.insertSelective(userSystem);
+            userInfo.setSysUuid(sessionUser.getSysUuid());
+            if (StringUtils.equals(userInfo.getRole(), ConstantInterface.ADMIN)){
+                systemRegService.addUserDefaultRole(userInfo);
+            }else {
+                userSystem = new UserSystem();
+                userSystem.setUserId(userInfo.getId());
+                userSystem.setSysUuid(sessionUser.getSysUuid());
+                userSystem.setAudit(0);
+                userSystemMapper.insertSelective(userSystem);
+            }
         }
+        //选择注册的系统
         String sysRegUuidString = userInfo.getSysRegUuidString();
         if (sysRegUuidString != null && !"".equals(sysRegUuidString)){
             String[] strings = CommonUtil.formatStringAtToArray(sysRegUuidString);

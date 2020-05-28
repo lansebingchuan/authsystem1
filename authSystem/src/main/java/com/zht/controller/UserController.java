@@ -44,6 +44,8 @@ public class UserController extends BaseController {
     @Autowired
     RedisUtil.RedisString redisString;
 
+    @Autowired
+    RedisUtil.RedisList redisList;
     /**
      *
      * @param loginName 登录名
@@ -189,7 +191,9 @@ public class UserController extends BaseController {
                 if (userIds != null){
                     Integer userId = Integer.parseInt(userIds);
                     List<Permission> permissionList = userSystemService.getUserRolePermissionByIdAndSysUuid(userId, sysUuid);
+
                     model.addAttribute("permissionList", permissionList);
+                    redisList.set("permission_"+userId, permissionList);
                 }else {
                     response.setContentType("text/html;charset=utf-8");
                     request.setCharacterEncoding("UTF-8");
